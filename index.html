@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Universal AI Chat</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+html,body{
+height:100%;
+margin:0;
+}
+
+.safe-bottom{
+padding-bottom:env(safe-area-inset-bottom);
+}
+
+.typing-cursor::after{
+content:"▋";
+animation:blink 1s infinite;
+}
+
+@keyframes blink{
+50%{opacity:0;}
+}
+
+/* Sidebar mobile animation */
+.sidebar{
+transition:transform .3s ease;
+}
+
+.sidebar.hidden-mobile{
+transform:translateX(-100%);
+}
+
+.dark body{
+background:#111827;
+color:#e5e7eb;
+}
+
+pre{
+overflow:auto;
+border-radius:10px;
+padding:10px;
+background:#111827;
+color:white;
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- Loader (GitHub Pages blank page protection) -->
+<div id="loading"
+class="fixed inset-0 flex items-center justify-center bg-white z-50 text-lg font-semibold">
+Loading App...
+</div>
+
+<div id="app" class="flex min-h-screen">
+
+<!-- ================= SIDEBAR ================= -->
+<div id="sidebar"
+class="sidebar w-72 bg-white border-r flex flex-col fixed md:static h-full z-40 hidden-mobile md:translate-x-0">
+
+<div class="p-4 border-b flex justify-between">
+
+<button id="newChat"
+class="bg-blue-500 text-white px-3 py-2 rounded">
+New Chat
+</button>
+
+<button id="settingsBtn">⚙️</button>
+
+</div>
+
+<div id="chatList"
+class="flex-1 overflow-auto p-2 space-y-2">
+</div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="flex flex-col flex-1">
+
+<!-- TOP BAR -->
+<div class="p-3 border-b bg-white flex items-center gap-3">
+
+<button id="menuBtn"
+class="md:hidden text-xl">☰</button>
+
+<div class="font-semibold">
+Universal AI Chat
+</div>
+
+<div class="ml-auto flex gap-3">
+
+<button id="darkToggle">🌙</button>
+
+</div>
+
+</div>
+
+<!-- CHAT AREA -->
+<div id="chatArea"
+class="flex-1 overflow-auto p-4 space-y-4 pb-40">
+</div>
+
+<!-- INPUT BAR -->
+<div
+class="fixed bottom-0 left-0 md:left-72 right-0 bg-white border-t safe-bottom">
+
+<div class="p-3 flex gap-2">
+
+<textarea id="prompt"
+rows="1"
+placeholder="Ask anything..."
+class="flex-1 border rounded p-2 resize-none"></textarea>
+
+<button id="imageBtn"
+class="bg-purple-500 text-white px-3 rounded">
+🖼
+</button>
+
+<button id="videoBtn"
+class="bg-pink-500 text-white px-3 rounded">
+🎬
+</button>
+
+<button id="send"
+class="bg-blue-500 text-white px-4 rounded">
+Send
+</button>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings"
+class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+<div class="bg-white p-6 rounded w-96 space-y-3">
+
+<h2 class="font-bold text-lg">
+Settings
+</h2>
+
+<input id="apiKey"
+type="password"
+placeholder="OpenRouter API Key"
+class="border w-full p-2 rounded">
+
+<input id="model"
+placeholder="Model"
+class="border w-full p-2 rounded"
+value="deepseek/deepseek-r1:free">
+
+<textarea id="systemPrompt"
+placeholder="System Prompt"
+class="border w-full p-2 rounded"></textarea>
+
+<div class="flex justify-end gap-2">
+
+<button id="closeSettings">
+Cancel
+</button>
+
+<button id="saveSettings"
+class="bg-blue-500 text-white px-4 py-1 rounded">
+Save
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ======================
+APP STATE
+======================*/
+
+const loading=document.getElementById("loading");
+
+let state={
+
+apiKey:localStorage.getItem("apiKey")||"",
+model:localStorage.getItem("model")||
+"deepseek/deepseek-r1:free",
+
+dark:localStorage.getItem("dark")==="1",
+
+chats:JSON.parse(localStorage.getItem("chats")||"[]"),
+
+active:null
+
+};
+
+/* ======================
+INIT
+======================*/
+
+function init(){
+
+document.getElementById("apiKey").value=state.apiKey;
+document.getElementById("model").value=state.model;
+
+if(state.dark){
+
+document.documentElement.classList.add("dark");
+document.body.classList.add("bg-gray-900","text-white");
+
+}
+
+if(!state.chats.length){
+
+createChat();
+
+}else{
+
+state.active=state.chats[0].id;
+
+}
+
+renderChats();
+renderMessages();
+
+loading.style.display="none";
+
+}
+
+function saveChats(){
+
+localStorage.setItem(
+"chats",
+JSON.stringify(state.chats)
+);
+
+}
+
+/* ======================
+CHAT MANAGEMENT
+======================*/
+
+function createChat(){
+
+const id=Date.now();
+
+state.chats.unshift({
+
+id,
+name:"New Chat",
+messages:[],
+system:""
+
+});
+
+state.active=id;
+
+saveChats();
+renderChats();
+renderMessages();
+
+}
+
+function getActive(){
+
+return state.chats.find(
+c=>c.id===state.active
+);
+
+}
+
+function renameChat(id){
+
+let name=prompt("Rename chat");
+
+if(!name)return;
+
+let chat=state.chats.find(c=>c.id===id);
+
+chat.name=name;
+
+saveChats();
+
+renderChats();
+
+}
+
+function deleteChat(id){
+
+if(!confirm("Delete chat?"))return;
+
+state.chats=
+state.chats.filter(c=>c.id!==id);
+
+if(!state.chats.length){
+
+createChat();
+
+}else{
+
+state.active=state.chats[0].id;
+
+}
+
+saveChats();
+
+renderChats();
+
+renderMessages();
+
+}
+
+function renderChats(){
+
+let el=document.getElementById("chatList");
+
+el.innerHTML="";
+
+state.chats.forEach(chat=>{
+
+let div=document.createElement("div");
+
+div.className=
+"p-2 border rounded flex justify-between cursor-pointer";
+
+div.innerHTML=`
+
+<span>${chat.name}</span>
+
+<div class="space-x-1">
+
+<button data-r="${chat.id}">✏️</button>
+
+<button data-d="${chat.id}">🗑</button>
+
+</div>
+
+`;
+
+div.onclick=()=>{
+
+state.active=chat.id;
+
+renderMessages();
+
+};
+
+div.querySelector("[data-r]").onclick=e=>{
+
+e.stopPropagation();
+
+renameChat(chat.id);
+
+};
+
+div.querySelector("[data-d]").onclick=e=>{
+
+e.stopPropagation();
+
+deleteChat(chat.id);
+
+};
+
+el.appendChild(div);
+
+});
+
+}
+
+/* ======================
+MESSAGES
+======================*/
+
+function addMessage(role,content){
+
+let chat=getActive();
+
+chat.messages.push({
+
+role,
+content
+
+});
+
+saveChats();
+
+}
+
+function renderMessages(){
+
+let chat=getActive();
+
+let area=document.getElementById("chatArea");
+
+area.innerHTML="";
+
+(chat.messages||[]).forEach(m=>{
+
+area.appendChild(
+createMessage(m.role,m.content)
+);
+
+});
+
+area.scrollTop=area.scrollHeight;
+
+}
+
+function createMessage(role,text){
+
+let div=document.createElement("div");
+
+div.className=
+role==="user"
+?"text-right"
+:"text-left";
+
+let bubble=document.createElement("div");
+
+bubble.className=
+"inline-block max-w-xl p-3 rounded bg-white shadow";
+
+bubble.innerHTML=
+marked.parse(text);
+
+div.appendChild(bubble);
+
+return div;
+
+}
+
+/* ======================
+STREAM CHAT
+======================*/
+
+async function sendChat(){
+
+const input=document.getElementById("prompt");
+
+let text=input.value.trim();
+
+if(!text)return;
+
+if(!state.apiKey){
+
+alert("Add API key");
+
+return;
+
+}
+
+input.value="";
+
+addMessage("user",text);
+
+renderMessages();
+
+let aiDiv=createMessage(
+"assistant",
+"<span class='typing-cursor'></span>"
+);
+
+document
+.getElementById("chatArea")
+.appendChild(aiDiv);
+
+let bubble=aiDiv.querySelector("div");
+
+let chat=getActive();
+
+let messages=[];
+
+if(chat.system){
+
+messages.push({
+role:"system",
+content:chat.system
+});
+
+}
+
+chat.messages.forEach(m=>{
+
+messages.push({
+
+role:m.role,
+content:m.content
+
+});
+
+});
+
+try{
+
+const res=await fetch(
+
+"https://openrouter.ai/api/v1/chat/completions",
+
+{
+
+method:"POST",
+
+headers:{
+
+Authorization:
+"Bearer "+state.apiKey,
+
+"Content-Type":
+"application/json"
+
+},
+
+body:JSON.stringify({
+
+model:state.model,
+
+messages,
+
+stream:true
+
+})
+
+});
+
+const reader=
+res.body.getReader();
+
+const decoder=new TextDecoder();
+
+let full="";
+
+while(true){
+
+const {done,value}
+=await reader.read();
+
+if(done)break;
+
+const chunk=
+decoder.decode(value);
+
+chunk.split("\n")
+.forEach(line=>{
+
+if(!line.startsWith("data:"))return;
+
+let data=
+line.replace("data:","").trim();
+
+if(data==="[DONE]")
+return;
+
+try{
+
+let json=
+JSON.parse(data);
+
+let token=
+json.choices?.[0]
+?.delta?.content;
+
+if(token){
+
+full+=token;
+
+bubble.innerHTML=
+marked.parse(full)
++
+"<span class='typing-cursor'></span>";
+
+document
+.getElementById("chatArea")
+.scrollTop=
+999999;
+
+}
+
+}catch{}
+
+});
+
+}
+
+bubble.innerHTML=
+marked.parse(full);
+
+addMessage(
+"assistant",
+full
+);
+
+}catch(e){
+
+bubble.innerHTML=
+"Error response.";
+
+}
+
+}
+
+/* ======================
+IMAGE GENERATION
+(OpenRouter compatible images endpoint)
+======================*/
+
+async function generateImage(){
+
+let prompt=window.prompt(
+"Image Prompt?"
+);
+
+if(!prompt)return;
+
+if(!state.apiKey){
+
+alert("Add API Key");
+
+return;
+
+}
+
+let chat=getActive();
+
+addMessage(
+"assistant",
+"🖼 Generating image..."
+);
+
+renderMessages();
+
+try{
+
+let res=await fetch(
+
+"https://openrouter.ai/api/v1/images/generations",
+
+{
+
+method:"POST",
+
+headers:{
+
+Authorization:
+"Bearer "+state.apiKey,
+
+"Content-Type":
+"application/json"
+
+},
+
+body:JSON.stringify({
+
+model:"openai/dall-e-3",
+
+prompt
+
+})
+
+});
+
+let json=await res.json();
+
+let url=
+json.data?.[0]?.url;
+
+if(url){
+
+addMessage(
+"assistant",
+`![image](${url})`
+);
+
+}else{
+
+addMessage(
+"assistant",
+"Image failed."
+
+);
+
+}
+
+}catch{
+
+addMessage(
+"assistant",
+"Image API Error."
+);
+
+}
+
+renderMessages();
+
+}
+
+/* ======================
+VIDEO GENERATION
+(simple AI placeholder — works with APIs supporting video)
+======================*/
+
+async function generateVideo(){
+
+let prompt=window.prompt(
+"Video Prompt?"
+);
+
+if(!prompt)return;
+
+addMessage(
+"assistant",
+"🎬 Video generation requested:\n\n"+prompt+
+"\n\n(Use OpenRouter video supported model API)"
+);
+
+renderMessages();
+
+}
+
+/* ======================
+SETTINGS
+======================*/
+
+document
+.getElementById("settingsBtn")
+.onclick=()=>{
+
+document
+.getElementById("settings")
+.classList.remove("hidden");
+
+};
+
+document
+.getElementById("closeSettings")
+.onclick=()=>{
+
+document
+.getElementById("settings")
+.classList.add("hidden");
+
+};
+
+document
+.getElementById("saveSettings")
+.onclick=()=>{
+
+state.apiKey=
+document.getElementById("apiKey").value;
+
+state.model=
+document.getElementById("model").value;
+
+let chat=getActive();
+
+chat.system=
+document
+.getElementById("systemPrompt")
+.value;
+
+localStorage.setItem(
+"apiKey",
+state.apiKey
+);
+
+localStorage.setItem(
+"model",
+state.model
+);
+
+saveChats();
+
+document
+.getElementById("settings")
+.classList.add("hidden");
+
+};
+
+/* ======================
+DARK MODE
+======================*/
+
+document
+.getElementById("darkToggle")
+.onclick=()=>{
+
+state.dark=!state.dark;
+
+localStorage.setItem(
+"dark",
+state.dark?"1":"0"
+);
+
+location.reload();
+
+};
+
+/* ======================
+SIDEBAR MOBILE
+======================*/
+
+document
+.getElementById("menuBtn")
+.onclick=()=>{
+
+document
+.getElementById("sidebar")
+.classList.toggle(
+"hidden-mobile"
+);
+
+};
+
+/* ======================
+BUTTON EVENTS
+======================*/
+
+document
+.getElementById("send")
+.onclick=sendChat;
+
+document
+.getElementById("imageBtn")
+.onclick=generateImage;
+
+document
+.getElementById("videoBtn")
+.onclick=generateVideo;
+
+document
+.getElementById("newChat")
+.onclick=createChat;
+
+document
+.getElementById("prompt")
+.addEventListener(
+"keydown",
+e=>{
+
+if(
+e.key==="Enter"
+&&!e.shiftKey
+){
+
+e.preventDefault();
+
+sendChat();
+
+}
+
+});
+
+init();
+
+</script>
+
+</body>
+</html>
