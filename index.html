@@ -1,17 +1,24 @@
 <script>
 
+document.addEventListener("DOMContentLoaded",()=>{
+
 let chats=[{id:Date.now(),messages:[]}]
 
 let active=chats[0].id
 
 const chatArea=document.getElementById("chatArea")
+const send=document.getElementById("send")
+const imageBtn=document.getElementById("imageBtn")
+const videoBtn=document.getElementById("videoBtn")
+const sidebar=document.getElementById("sidebar")
+const menuBtn=document.getElementById("menuBtn")
+const newChat=document.getElementById("newChat")
+const plusBtn=document.getElementById("plusBtn")
+const aspectModal=document.getElementById("aspectModal")
 
 function activeChat(){
-
 return chats.find(c=>c.id===active)
-
 }
-
 
 function addMessage(role,text){
 
@@ -20,7 +27,6 @@ activeChat().messages.push({role,text})
 renderMessages()
 
 }
-
 
 function renderMessages(){
 
@@ -49,7 +55,7 @@ chatArea.scrollTop=999999
 }
 
 
-// ⭐ CHATGPT TYPING EFFECT
+// ⭐ typing animation
 
 async function typingReply(text){
 
@@ -82,7 +88,7 @@ bubble.innerHTML=marked.parse(msg)
 }
 
 
-// ⭐ VOICE SPEAK
+// ⭐ Voice Speak
 
 function speakAI(text){
 
@@ -103,7 +109,7 @@ speechSynthesis.speak(speech)
 }
 
 
-// ⭐ REAL AI CHAT CONNECT
+// ⭐ REAL AI CHAT
 
 async function sendChat(){
 
@@ -123,7 +129,25 @@ try{
 
 let res=await fetch(
 
-"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat"
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+message:text
+
+})
+
+}
 
 )
 
@@ -142,7 +166,7 @@ addMessage("assistant","❌ API Error")
 }
 
 
-// ⭐ DOUBLE TAP SEND = VOICE
+// ⭐ DOUBLE TAP SEND
 
 let lastTap=0
 
@@ -194,7 +218,7 @@ alert("Voice not supported")
 }
 
 
-// ⭐ IMAGE GENERATOR
+// ⭐ IMAGE
 
 async function makeImage(prompt,ratio){
 
@@ -222,7 +246,7 @@ addMessage("assistant",
 
 `![img](${url})
 
-<button onclick="makeVideoFromImage('${url}')">
+<button onclick="window.makeVideoFromImage('${url}')">
 
 🎬 Make Video
 
@@ -233,9 +257,9 @@ addMessage("assistant",
 }
 
 
-// ⭐ VIDEO PREVIEW
+// ⭐ VIDEO
 
-function makeVideoFromImage(img){
+window.makeVideoFromImage=function(img){
 
 addMessage("assistant","🎬 Creating cinematic video...")
 
@@ -258,8 +282,6 @@ addMessage("assistant",
 }
 
 
-// ⭐ VIDEO PROMPT
-
 function makeVideo(prompt,ratio){
 
 addMessage("assistant",
@@ -271,7 +293,7 @@ addMessage("assistant",
 }
 
 
-// ⭐ ASPECT MENU
+// ⭐ Aspect
 
 let actionType=null
 
@@ -313,15 +335,13 @@ makeVideo(prompt,ratio)
 }
 
 
-// ⭐ EVENTS
+// EVENTS
 
 imageBtn.onclick=()=>openAspect("image")
 
 videoBtn.onclick=()=>openAspect("video")
 
-menuBtn.onclick=
-
-()=>sidebar.classList.toggle("hide")
+menuBtn.onclick=()=>sidebar.classList.toggle("hide")
 
 newChat.onclick=()=>{
 
@@ -342,5 +362,7 @@ alert("+ Upload coming 🔥")
 }
 
 renderMessages()
+
+})
 
 </script>
