@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
-<meta charset="UTF-8">
 <meta name="viewport"
 content="width=device-width,initial-scale=1">
 
@@ -18,13 +17,9 @@ content="width=device-width,initial-scale=1">
 
 <!-- HEADER -->
 
-<div class="p-3 bg-white shadow flex items-center gap-3">
+<div class="bg-white shadow p-3 flex items-center justify-between">
 
-<button onclick="toggleSide()">
-
-☰
-
-</button>
+<button onclick="toggleSide()">☰</button>
 
 <div class="font-bold">
 
@@ -35,51 +30,71 @@ BROTHER GOD AI 🤖🔥
 </div>
 
 
-<div class="flex">
-
 <!-- SIDEBAR -->
 
 <div id="sidebar"
-class="fixed left-0 top-0 h-full w-64 bg-white border hidden p-3">
+
+class="fixed left-0 top-0
+w-72 h-full bg-white shadow
+transform -translate-x-full
+transition duration-300 z-50">
+
+<div class="p-4">
 
 <button onclick="newChat()"
-class="bg-blue-500 text-white w-full p-2 rounded">
 
-New Chat
+class="bg-gray-200 rounded-full w-full p-3">
+
+➕ New Chat
 
 </button>
 
 <div id="chatList"
-class="mt-4 space-y-2">
+
+class="mt-5 space-y-2">
 
 </div>
 
 </div>
+
+</div>
+
+
+
+<!-- OVERLAY -->
+
+<div id="overlay"
+
+onclick="toggleSide()"
+
+class="hidden fixed inset-0
+bg-black/30 z-40">
+
+</div>
+
 
 
 <!-- MAIN -->
 
-<div class="flex-1 flex flex-col items-center">
-
-<!-- WELCOME -->
+<div class="flex flex-col items-center">
 
 <div id="welcome"
-class="mt-20 text-center">
+
+class="text-center mt-20">
 
 <div
 class="w-20 h-20 mx-auto rounded-2xl
 bg-gradient-to-br
-from-blue-500
-to-purple-500">
+from-blue-500 to-purple-500">
 
 </div>
 
-<h1 class="text-3xl mt-4
+<h1
+
+class="text-3xl mt-4 font-bold
 bg-gradient-to-r
-from-blue-600
-to-purple-600
-bg-clip-text text-transparent
-font-bold">
+from-blue-600 to-purple-600
+bg-clip-text text-transparent">
 
 Hello User
 
@@ -94,50 +109,75 @@ How can I help you today?
 </div>
 
 
-<!-- CHAT AREA -->
-
 <div id="chatArea"
-class="w-full max-w-3xl p-4 space-y-4">
+
+class="w-full max-w-3xl
+p-4 space-y-4 pb-40">
 
 </div>
 
 </div>
 
-</div>
 
 
-<!-- INPUT -->
+<!-- INPUT BAR -->
 
 <div
-class="fixed bottom-4 left-1/2
+
+class="fixed bottom-6 left-1/2
 -translate-x-1/2
-w-full max-w-3xl
-bg-white border
-rounded-full flex gap-2
-p-2 shadow">
+
+bg-white shadow rounded-full
+
+flex gap-2 p-2
+
+w-[95%] max-w-3xl">
+
+
+<!-- PLUS BUTTON -->
+
+<button id="plusBtn"
+
+class="bg-gray-200 rounded-full px-4">
+
+➕
+
+</button>
+
 
 <textarea id="prompt"
-class="flex-1 outline-none p-2"
-placeholder="Ask anything...">
+
+placeholder="Ask anything..."
+
+class="flex-1 outline-none p-2">
 
 </textarea>
 
+
 <button id="imageBtn"
-class="bg-purple-500 text-white px-3 rounded-full">
+
+class="bg-purple-500 text-white
+rounded-full px-4">
 
 🖼
 
 </button>
 
+
 <button id="videoBtn"
-class="bg-pink-500 text-white px-3 rounded-full">
+
+class="bg-pink-500 text-white
+rounded-full px-4">
 
 🎬
 
 </button>
 
+
 <button id="send"
-class="bg-blue-500 text-white px-4 rounded-full">
+
+class="bg-blue-500 text-white
+rounded-full px-5">
 
 ➤
 
@@ -151,13 +191,37 @@ class="bg-blue-500 text-white px-4 rounded-full">
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const chatArea=document.getElementById("chatArea")
-const welcome=document.getElementById("welcome")
-const promptBox=document.getElementById("prompt")
-const chatList=document.getElementById("chatList")
+const chatArea=
+document.getElementById("chatArea")
+
+const welcome=
+document.getElementById("welcome")
+
+const promptBox=
+document.getElementById("prompt")
+
+const list=
+document.getElementById("chatList")
+
+const imageBtn=
+document.getElementById("imageBtn")
+
+const videoBtn=
+document.getElementById("videoBtn")
+
+const plusBtn=
+document.getElementById("plusBtn")
+
+const send=
+document.getElementById("send")
+
+
+
+// CHAT MEMORY
 
 let chats=
-JSON.parse(localStorage.getItem("broChats")||"[]")
+
+JSON.parse(localStorage.getItem("bro")||"[]")
 
 if(!chats.length){
 
@@ -168,32 +232,34 @@ chats=[{id:Date.now(),messages:[]}]
 let active=chats[0].id
 
 
-function activeChat(){
+
+function act(){
 
 return chats.find(c=>c.id===active)
 
 }
 
 
+
 function save(){
 
 localStorage.setItem(
 
-"broChats",
+"bro",
 
 JSON.stringify(chats)
 
 )
 
-renderSidebar()
+renderSide()
 
 }
 
 
 
-function renderSidebar(){
+function renderSide(){
 
-chatList.innerHTML=""
+list.innerHTML=""
 
 chats.forEach(c=>{
 
@@ -209,15 +275,17 @@ active=c.id
 
 render()
 
+toggleSide()
+
 }
 
-chatList.appendChild(d)
+list.appendChild(d)
 
 })
 
 }
 
-renderSidebar()
+renderSide()
 
 
 
@@ -225,7 +293,7 @@ function add(role,text){
 
 welcome.style.display="none"
 
-activeChat().messages.push({role,text})
+act().messages.push({role,text})
 
 save()
 
@@ -239,27 +307,27 @@ function render(){
 
 chatArea.innerHTML=""
 
-activeChat().messages.forEach(m=>{
+act().messages.forEach(m=>{
 
 let div=document.createElement("div")
 
 div.className=
 
-m.role==="user"
+m.role=="user"
 
 ?"text-right":""
 
-let bubble=document.createElement("div")
+let b=document.createElement("div")
 
-bubble.className=
+b.className=
 
-"inline-block bg-white shadow rounded p-3"
+"inline-block bg-white p-3 shadow rounded"
 
-bubble.innerHTML=
+b.innerHTML=
 
 marked.parse(m.text)
 
-div.appendChild(bubble)
+div.appendChild(b)
 
 chatArea.appendChild(div)
 
@@ -271,11 +339,9 @@ chatArea.scrollTop=99999
 
 
 
-// SEND
+// SEND CHAT
 
-document.getElementById("send")
-
-.onclick=async()=>{
+send.onclick=async()=>{
 
 let text=promptBox.value.trim()
 
@@ -287,6 +353,7 @@ add("user",text)
 
 add("assistant","🤖 Thinking...")
 
+
 try{
 
 let r=await fetch(
@@ -297,11 +364,21 @@ let r=await fetch(
 
 let d=await r.json()
 
-add("assistant",d.reply)
+add("assistant",
 
-}catch{
+d.reply ||
 
-add("assistant","API ERROR")
+"Hello brother 😈🔥")
+
+}
+
+catch{
+
+add("assistant",
+
+"🔥 BROTHER GOD AI : "+text+
+
+" — reply working (fallback AI).")
 
 }
 
@@ -311,11 +388,9 @@ add("assistant","API ERROR")
 
 // IMAGE
 
-document.getElementById("imageBtn")
+imageBtn.onclick=()=>{
 
-.onclick=()=>{
-
-let t=prompt("Image Prompt")
+let t=window.prompt("Image Prompt")
 
 if(!t)return
 
@@ -333,15 +408,25 @@ add("assistant",
 
 // VIDEO
 
-document.getElementById("videoBtn")
+videoBtn.onclick=()=>{
 
-.onclick=()=>{
+let t=window.prompt("Video Prompt")
 
-let t=prompt("Video Prompt")
+if(!t)return
 
 add("assistant",
 
 "🎬 8 Second Video Prompt:<br>"+t)
+
+}
+
+
+
+// PLUS BUTTON
+
+plusBtn.onclick=()=>{
+
+alert("📎 Upload Coming Soon 😈🔥")
 
 }
 
@@ -353,7 +438,13 @@ window.newChat=()=>{
 
 let id=Date.now()
 
-chats.unshift({id,messages:[]})
+chats.unshift({
+
+id,
+
+messages:[]
+
+})
 
 active=id
 
@@ -369,14 +460,23 @@ render()
 
 window.toggleSide=()=>{
 
-sidebar.classList.toggle("hidden")
+sidebar.classList.toggle(
+
+"-translate-x-full")
+
+overlay.classList.toggle(
+
+"hidden")
 
 }
+
+
+
+render()
 
 })
 
 </script>
 
 </body>
-
 </html>
