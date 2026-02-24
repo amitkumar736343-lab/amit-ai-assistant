@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
-<meta name="viewport"
-content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>BROTHER GOD AI 😈🔥</title>
 
@@ -17,26 +17,30 @@ content="width=device-width,initial-scale=1">
 
 <!-- HEADER -->
 
-<div class="bg-white shadow p-3 flex items-center justify-between">
+<div class="bg-white shadow p-3 flex justify-between items-center">
 
 <button onclick="toggleSide()">☰</button>
 
-<div class="font-bold">
+<div class="font-bold text-lg">
 
 BROTHER GOD AI 🤖🔥
 
 </div>
 
+<div></div>
+
 </div>
+
 
 
 <!-- SIDEBAR -->
 
 <div id="sidebar"
 
-class="fixed left-0 top-0
-w-72 h-full bg-white shadow
+class="fixed left-0 top-0 w-72 h-full bg-white shadow
+
 transform -translate-x-full
+
 transition duration-300 z-50">
 
 <div class="p-4">
@@ -67,8 +71,7 @@ class="mt-5 space-y-2">
 
 onclick="toggleSide()"
 
-class="hidden fixed inset-0
-bg-black/30 z-40">
+class="hidden fixed inset-0 bg-black/30 z-40">
 
 </div>
 
@@ -83,8 +86,11 @@ bg-black/30 z-40">
 class="text-center mt-20">
 
 <div
+
 class="w-20 h-20 mx-auto rounded-2xl
+
 bg-gradient-to-br
+
 from-blue-500 to-purple-500">
 
 </div>
@@ -92,8 +98,11 @@ from-blue-500 to-purple-500">
 <h1
 
 class="text-3xl mt-4 font-bold
+
 bg-gradient-to-r
+
 from-blue-600 to-purple-600
+
 bg-clip-text text-transparent">
 
 Hello User
@@ -109,9 +118,11 @@ How can I help you today?
 </div>
 
 
+
 <div id="chatArea"
 
 class="w-full max-w-3xl
+
 p-4 space-y-4 pb-40">
 
 </div>
@@ -125,6 +136,7 @@ p-4 space-y-4 pb-40">
 <div
 
 class="fixed bottom-6 left-1/2
+
 -translate-x-1/2
 
 bg-white shadow rounded-full
@@ -134,7 +146,6 @@ flex gap-2 p-2
 w-[95%] max-w-3xl">
 
 
-<!-- PLUS BUTTON -->
 
 <button id="plusBtn"
 
@@ -145,18 +156,21 @@ class="bg-gray-200 rounded-full px-4">
 </button>
 
 
+
 <textarea id="prompt"
 
 placeholder="Ask anything..."
 
-class="flex-1 outline-none p-2">
+class="flex-1 outline-none p-2 resize-none">
 
 </textarea>
+
 
 
 <button id="imageBtn"
 
 class="bg-purple-500 text-white
+
 rounded-full px-4">
 
 🖼
@@ -164,9 +178,11 @@ rounded-full px-4">
 </button>
 
 
+
 <button id="videoBtn"
 
 class="bg-pink-500 text-white
+
 rounded-full px-4">
 
 🎬
@@ -174,9 +190,11 @@ rounded-full px-4">
 </button>
 
 
+
 <button id="send"
 
 class="bg-blue-500 text-white
+
 rounded-full px-5">
 
 ➤
@@ -191,29 +209,15 @@ rounded-full px-5">
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const chatArea=
-document.getElementById("chatArea")
+const chatArea=document.getElementById("chatArea")
+const welcome=document.getElementById("welcome")
+const promptBox=document.getElementById("prompt")
+const list=document.getElementById("chatList")
 
-const welcome=
-document.getElementById("welcome")
-
-const promptBox=
-document.getElementById("prompt")
-
-const list=
-document.getElementById("chatList")
-
-const imageBtn=
-document.getElementById("imageBtn")
-
-const videoBtn=
-document.getElementById("videoBtn")
-
-const plusBtn=
-document.getElementById("plusBtn")
-
-const send=
-document.getElementById("send")
+const imageBtn=document.getElementById("imageBtn")
+const videoBtn=document.getElementById("videoBtn")
+const plusBtn=document.getElementById("plusBtn")
+const send=document.getElementById("send")
 
 
 
@@ -247,15 +251,15 @@ localStorage.setItem(
 
 "bro",
 
-JSON.stringify(chats)
-
-)
+JSON.stringify(chats))
 
 renderSide()
 
 }
 
 
+
+// SIDEBAR CHAT LIST
 
 function renderSide(){
 
@@ -265,7 +269,9 @@ chats.forEach(c=>{
 
 let d=document.createElement("div")
 
-d.className="border p-2 cursor-pointer"
+d.className=
+
+"border p-2 rounded cursor-pointer"
 
 d.innerText="Chat "+c.id
 
@@ -303,6 +309,8 @@ render()
 
 
 
+// CHAT RENDER
+
 function render(){
 
 chatArea.innerHTML=""
@@ -313,7 +321,7 @@ let div=document.createElement("div")
 
 div.className=
 
-m.role=="user"
+m.role==="user"
 
 ?"text-right":""
 
@@ -321,7 +329,7 @@ let b=document.createElement("div")
 
 b.className=
 
-"inline-block bg-white p-3 shadow rounded"
+"inline-block bg-white p-3 shadow rounded max-w-xl"
 
 b.innerHTML=
 
@@ -333,7 +341,7 @@ chatArea.appendChild(div)
 
 })
 
-chatArea.scrollTop=99999
+chatArea.scrollTop=999999
 
 }
 
@@ -353,14 +361,29 @@ add("user",text)
 
 add("assistant","🤖 Thinking...")
 
-
 try{
 
 let r=await fetch(
 
-"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat"
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat",
 
-)
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+message:text
+
+})
+
+})
 
 let d=await r.json()
 
@@ -368,7 +391,7 @@ add("assistant",
 
 d.reply ||
 
-"Hello brother 😈🔥")
+"😈 BROTHER GOD ONLINE")
 
 }
 
@@ -376,9 +399,7 @@ catch{
 
 add("assistant",
 
-"🔥 BROTHER GOD AI : "+text+
-
-" — reply working (fallback AI).")
+"🔥 Fallback AI Reply : "+text)
 
 }
 
@@ -386,7 +407,7 @@ add("assistant",
 
 
 
-// IMAGE
+// IMAGE BUTTON
 
 imageBtn.onclick=()=>{
 
@@ -406,7 +427,7 @@ add("assistant",
 
 
 
-// VIDEO
+// VIDEO BUTTON
 
 videoBtn.onclick=()=>{
 
@@ -422,7 +443,7 @@ add("assistant",
 
 
 
-// PLUS BUTTON
+// PLUS BUTTON FINAL
 
 plusBtn.onclick=()=>{
 
@@ -460,13 +481,13 @@ render()
 
 window.toggleSide=()=>{
 
-sidebar.classList.toggle(
+document.getElementById("sidebar")
 
-"-translate-x-full")
+.classList.toggle("-translate-x-full")
 
-overlay.classList.toggle(
+document.getElementById("overlay")
 
-"hidden")
+.classList.toggle("hidden")
 
 }
 
