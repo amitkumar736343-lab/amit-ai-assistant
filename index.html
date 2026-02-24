@@ -1,13 +1,17 @@
 <script>
 
 let chats=[{id:Date.now(),messages:[]}]
+
 let active=chats[0].id
 
 const chatArea=document.getElementById("chatArea")
 
 function activeChat(){
+
 return chats.find(c=>c.id===active)
+
 }
+
 
 function addMessage(role,text){
 
@@ -16,6 +20,7 @@ activeChat().messages.push({role,text})
 renderMessages()
 
 }
+
 
 function renderMessages(){
 
@@ -44,7 +49,7 @@ chatArea.scrollTop=999999
 }
 
 
-// ⭐ ChatGPT typing animation
+// ⭐ CHATGPT TYPING EFFECT
 
 async function typingReply(text){
 
@@ -66,7 +71,7 @@ msg+=c
 
 bubble.innerHTML=marked.parse(msg+" ▋")
 
-await new Promise(r=>setTimeout(r,20))
+await new Promise(r=>setTimeout(r,18))
 
 chatArea.scrollTop=999999
 
@@ -77,20 +82,28 @@ bubble.innerHTML=marked.parse(msg)
 }
 
 
-// ⭐ Voice Speak
+// ⭐ VOICE SPEAK
 
 function speakAI(text){
+
+try{
 
 let speech=new SpeechSynthesisUtterance(text)
 
 speech.lang="en-US"
 
+speech.rate=1
+
+speechSynthesis.cancel()
+
 speechSynthesis.speak(speech)
+
+}catch(e){}
 
 }
 
 
-// ⭐ REAL AI CHAT
+// ⭐ REAL AI CHAT CONNECT
 
 async function sendChat(){
 
@@ -129,7 +142,7 @@ addMessage("assistant","❌ API Error")
 }
 
 
-// ⭐ Voice Mic (double tap Send)
+// ⭐ DOUBLE TAP SEND = VOICE
 
 let lastTap=0
 
@@ -154,6 +167,8 @@ lastTap=now
 
 function startVoice(){
 
+try{
+
 let rec=new webkitSpeechRecognition()
 
 rec.lang="en-US"
@@ -167,6 +182,12 @@ document.getElementById("prompt").value=
 e.results[0][0].transcript
 
 sendChat()
+
+}
+
+}catch(e){
+
+alert("Voice not supported")
 
 }
 
@@ -237,18 +258,20 @@ addMessage("assistant",
 }
 
 
+// ⭐ VIDEO PROMPT
+
 function makeVideo(prompt,ratio){
 
 addMessage("assistant",
 
-"🎬 Hollywood 8s Video Prompt:\n"+prompt+
+"🎬 Hollywood Video Prompt:\n"+prompt+
 
 "\nRatio:"+ratio)
 
 }
 
 
-// ⭐ Aspect
+// ⭐ ASPECT MENU
 
 let actionType=null
 
@@ -259,6 +282,7 @@ actionType=type
 aspectModal.style.display="flex"
 
 }
+
 
 aspectModal.onclick=e=>{
 
@@ -289,7 +313,7 @@ makeVideo(prompt,ratio)
 }
 
 
-// EVENTS
+// ⭐ EVENTS
 
 imageBtn.onclick=()=>openAspect("image")
 
