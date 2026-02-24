@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -17,92 +16,63 @@
 
 <!-- HEADER -->
 
-<div class="bg-white shadow p-3 flex justify-between items-center">
+<div class="bg-white shadow p-3 flex justify-between">
 
 <button onclick="toggleSide()">☰</button>
 
-<div class="font-bold text-lg">
+<div class="font-bold">
 
 BROTHER GOD AI 🤖🔥
 
 </div>
 
-<div></div>
+<button onclick="toggleDark()">🌙</button>
 
 </div>
-
 
 
 <!-- SIDEBAR -->
 
 <div id="sidebar"
-
 class="fixed left-0 top-0 w-72 h-full bg-white shadow
-
-transform -translate-x-full
-
-transition duration-300 z-50">
+transform -translate-x-full transition z-50">
 
 <div class="p-4">
 
 <button onclick="newChat()"
-
 class="bg-gray-200 rounded-full w-full p-3">
 
 ➕ New Chat
 
 </button>
 
-<div id="chatList"
-
-class="mt-5 space-y-2">
+<div id="chatList" class="mt-5 space-y-2"></div>
 
 </div>
 
 </div>
 
-</div>
-
-
-
-<!-- OVERLAY -->
 
 <div id="overlay"
-
 onclick="toggleSide()"
-
-class="hidden fixed inset-0 bg-black/30 z-40">
-
-</div>
-
+class="hidden fixed inset-0 bg-black/30 z-40"></div>
 
 
 <!-- MAIN -->
 
 <div class="flex flex-col items-center">
 
-<div id="welcome"
-
-class="text-center mt-20">
+<div id="welcome" class="text-center mt-20">
 
 <div
-
 class="w-20 h-20 mx-auto rounded-2xl
-
-bg-gradient-to-br
-
-from-blue-500 to-purple-500">
+bg-gradient-to-br from-blue-500 to-purple-500">
 
 </div>
 
 <h1
-
 class="text-3xl mt-4 font-bold
-
-bg-gradient-to-r
-
-from-blue-600 to-purple-600
-
+bg-gradient-to-r from-blue-600 to-purple-600
 bg-clip-text text-transparent">
 
 Hello User
@@ -118,12 +88,8 @@ How can I help you today?
 </div>
 
 
-
 <div id="chatArea"
-
-class="w-full max-w-3xl
-
-p-4 space-y-4 pb-40">
+class="w-full max-w-3xl p-4 space-y-4 pb-40">
 
 </div>
 
@@ -131,71 +97,48 @@ p-4 space-y-4 pb-40">
 
 
 
-<!-- INPUT BAR -->
+<!-- INPUT -->
 
 <div
-
-class="fixed bottom-6 left-1/2
-
--translate-x-1/2
-
+class="fixed bottom-6 left-1/2 -translate-x-1/2
 bg-white shadow rounded-full
-
 flex gap-2 p-2
-
 w-[95%] max-w-3xl">
 
-
-
 <button id="plusBtn"
-
 class="bg-gray-200 rounded-full px-4">
 
 ➕
 
 </button>
 
-
-
 <textarea id="prompt"
-
 placeholder="Ask anything..."
+class="flex-1 outline-none p-2 resize-none"></textarea>
 
-class="flex-1 outline-none p-2 resize-none">
+<button id="micBtn"
+class="bg-gray-300 rounded-full px-4">
 
-</textarea>
+🎤
 
-
+</button>
 
 <button id="imageBtn"
-
-class="bg-purple-500 text-white
-
-rounded-full px-4">
+class="bg-purple-500 text-white rounded-full px-4">
 
 🖼
 
 </button>
 
-
-
 <button id="videoBtn"
-
-class="bg-pink-500 text-white
-
-rounded-full px-4">
+class="bg-pink-500 text-white rounded-full px-4">
 
 🎬
 
 </button>
 
-
-
 <button id="send"
-
-class="bg-blue-500 text-white
-
-rounded-full px-5">
+class="bg-blue-500 text-white rounded-full px-5">
 
 ➤
 
@@ -203,28 +146,17 @@ rounded-full px-5">
 
 </div>
 
-
+<input id="fileInput" type="file" hidden multiple>
 
 <script>
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const chatArea=document.getElementById("chatArea")
-const welcome=document.getElementById("welcome")
-const promptBox=document.getElementById("prompt")
-const list=document.getElementById("chatList")
-
-const imageBtn=document.getElementById("imageBtn")
-const videoBtn=document.getElementById("videoBtn")
-const plusBtn=document.getElementById("plusBtn")
-const send=document.getElementById("send")
-
-
-
-// CHAT MEMORY
+const area=chatArea
+const promptBox=prompt
+const list=chatList
 
 let chats=
-
 JSON.parse(localStorage.getItem("bro")||"[]")
 
 if(!chats.length){
@@ -247,10 +179,7 @@ return chats.find(c=>c.id===active)
 
 function save(){
 
-localStorage.setItem(
-
-"bro",
-
+localStorage.setItem("bro",
 JSON.stringify(chats))
 
 renderSide()
@@ -258,8 +187,6 @@ renderSide()
 }
 
 
-
-// SIDEBAR CHAT LIST
 
 function renderSide(){
 
@@ -270,7 +197,6 @@ chats.forEach(c=>{
 let d=document.createElement("div")
 
 d.className=
-
 "border p-2 rounded cursor-pointer"
 
 d.innerText="Chat "+c.id
@@ -309,39 +235,77 @@ render()
 
 
 
-// CHAT RENDER
-
 function render(){
 
-chatArea.innerHTML=""
+area.innerHTML=""
 
 act().messages.forEach(m=>{
 
 let div=document.createElement("div")
 
 div.className=
-
-m.role==="user"
-
-?"text-right":""
+m.role==="user"?"text-right":""
 
 let b=document.createElement("div")
 
 b.className=
-
 "inline-block bg-white p-3 shadow rounded max-w-xl"
 
-b.innerHTML=
-
-marked.parse(m.text)
+b.innerHTML=marked.parse(m.text)
 
 div.appendChild(b)
 
-chatArea.appendChild(div)
+area.appendChild(div)
 
 })
 
-chatArea.scrollTop=999999
+area.scrollTop=999999
+
+}
+
+
+
+async function typingReply(text){
+
+let msg=""
+
+let b=document.createElement("div")
+
+b.className=
+"bg-white p-3 shadow rounded inline-block"
+
+area.appendChild(b)
+
+for(let c of text){
+
+msg+=c
+
+b.innerHTML=
+marked.parse(msg+" ▋")
+
+await new Promise(r=>setTimeout(r,15))
+
+area.scrollTop=999999
+
+}
+
+b.innerHTML=marked.parse(msg)
+
+}
+
+
+
+// ENTER SEND
+
+promptBox.onkeydown=e=>{
+
+if(e.key==="Enter"&&!e.shiftKey){
+
+e.preventDefault()
+
+send.click()
+
+}
 
 }
 
@@ -365,41 +329,55 @@ try{
 
 let r=await fetch(
 
-"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat",
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify({
-
-message:text
-
-})
-
-})
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat")
 
 let d=await r.json()
 
-add("assistant",
+await typingReply(
 
-d.reply ||
+d.reply||"BROTHER GOD 😈🔥")
 
-"😈 BROTHER GOD ONLINE")
+speak(d.reply)
 
 }
 
 catch{
 
-add("assistant",
+await typingReply(
 
-"🔥 Fallback AI Reply : "+text)
+"🔥 Fallback reply : "+text)
+
+}
+
+}
+
+
+
+// VOICE
+
+micBtn.onclick=()=>{
+
+try{
+
+let r=
+new webkitSpeechRecognition()
+
+r.lang="en-US"
+
+r.start()
+
+r.onresult=e=>{
+
+promptBox.value=
+e.results[0][0].transcript
+
+send.click()
+
+}
+
+}catch{
+
+alert("Voice unsupported")
 
 }
 
@@ -407,53 +385,168 @@ add("assistant",
 
 
 
-// IMAGE BUTTON
+function speak(t){
+
+try{
+
+let s=
+new SpeechSynthesisUtterance(t)
+
+speechSynthesis.cancel()
+
+speechSynthesis.speak(s)
+
+}catch{}
+
+}
+
+
+
+// IMAGE
 
 imageBtn.onclick=()=>{
 
-let t=window.prompt("Image Prompt")
+let t=prompt("Image Prompt")
 
 if(!t)return
+
+let r=prompt(
+
+"1 Square\n2 YouTube\n3 Shorts\n4 Portrait")
+
+let w=1024,h=1024
+
+if(r=="2"){w=1280;h=720}
+
+if(r=="3"){w=720;h=1280}
+
+if(r=="4"){w=768;h=1024}
 
 let url=
 
-`https://image.pollinations.ai/prompt/${encodeURIComponent(t)}`
+`https://image.pollinations.ai/prompt/${encodeURIComponent(t)}?width=${w}&height=${h}`
 
 add("assistant",
 
-`![img](${url})`)
+`![img](${url})
+
+<button onclick="makeVideo('${url}')">
+
+🎬 Make 8s Video
+
+</button>`)
 
 }
 
 
 
-// VIDEO BUTTON
+// VIDEO
 
 videoBtn.onclick=()=>{
 
-let t=window.prompt("Video Prompt")
-
-if(!t)return
+let t=prompt("Video Prompt")
 
 add("assistant",
 
-"🎬 8 Second Video Prompt:<br>"+t)
+"🎬 Hollywood 8 Second Video:<br>"+t)
 
 }
 
 
 
-// PLUS BUTTON FINAL
+window.makeVideo=img=>{
 
-plusBtn.onclick=()=>{
+add("assistant",
 
-alert("📎 Upload Coming Soon 😈🔥")
+`<video autoplay loop controls
+class="max-w-full">
+
+<source src="${img}">
+
+</video>
+
+⭐ 8 Second Loop Preview`)
 
 }
 
 
 
-// NEW CHAT
+// FILE UPLOAD
+
+plusBtn.onclick=
+()=>fileInput.click()
+
+fileInput.onchange=()=>{
+
+for(let f of fileInput.files){
+
+let url=
+URL.createObjectURL(f)
+
+if(f.type.startsWith("image")){
+
+add("assistant",
+
+`📷 Image<br>
+<img src="${url}"
+class="rounded mt-2">`)
+
+}
+
+else if(f.type.startsWith("video")){
+
+add("assistant",
+
+`🎬 Video<br>
+<video controls>
+
+<source src="${url}">
+
+</video>`)
+
+}
+
+else{
+
+add("assistant",
+
+`📎 File :
+
+<a href="${url}"
+
+target="_blank"
+
+class="text-blue-500">
+
+${f.name}
+
+</a>`)
+
+}
+
+}
+
+}
+
+
+
+// DARK
+
+window.toggleDark=()=>{
+
+document.body.classList.toggle(
+
+"bg-black")
+
+document.body.classList.toggle(
+
+"text-white")
+
+}
+
+
+
+// CHAT
 
 window.newChat=()=>{
 
@@ -481,13 +574,13 @@ render()
 
 window.toggleSide=()=>{
 
-document.getElementById("sidebar")
+sidebar.classList.toggle(
 
-.classList.toggle("-translate-x-full")
+"-translate-x-full")
 
-document.getElementById("overlay")
+overlay.classList.toggle(
 
-.classList.toggle("hidden")
+"hidden")
 
 }
 
