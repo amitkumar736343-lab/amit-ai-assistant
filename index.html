@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
 <title>BROTHER GOD AI 😈🔥</title>
 
@@ -14,11 +16,31 @@
 
 <body class="bg-gray-100">
 
-<div class="flex min-h-screen">
+<!-- HEADER -->
+
+<div class="p-3 bg-white shadow flex items-center gap-3">
+
+<button onclick="toggleSide()">
+
+☰
+
+</button>
+
+<div class="font-bold">
+
+BROTHER GOD AI 🤖🔥
+
+</div>
+
+</div>
+
+
+<div class="flex">
 
 <!-- SIDEBAR -->
 
-<div class="w-64 bg-white border-r p-3">
+<div id="sidebar"
+class="fixed left-0 top-0 h-full w-64 bg-white border hidden p-3">
 
 <button onclick="newChat()"
 class="bg-blue-500 text-white w-full p-2 rounded">
@@ -37,54 +59,89 @@ class="mt-4 space-y-2">
 
 <!-- MAIN -->
 
-<div class="flex flex-col flex-1">
+<div class="flex-1 flex flex-col items-center">
 
-<div class="p-3 bg-white border-b font-bold">
+<!-- WELCOME -->
 
-BROTHER GOD AI 🤖🔥
-
-</div>
-
-
-<div id="chatArea"
-class="flex-1 overflow-auto p-4 space-y-4 pb-32">
-
-</div>
-
+<div id="welcome"
+class="mt-20 text-center">
 
 <div
-class="fixed bottom-0 left-64 right-0 bg-white border-t p-3 flex gap-2">
+class="w-20 h-20 mx-auto rounded-2xl
+bg-gradient-to-br
+from-blue-500
+to-purple-500">
+
+</div>
+
+<h1 class="text-3xl mt-4
+bg-gradient-to-r
+from-blue-600
+to-purple-600
+bg-clip-text text-transparent
+font-bold">
+
+Hello User
+
+</h1>
+
+<p class="text-gray-500">
+
+How can I help you today?
+
+</p>
+
+</div>
+
+
+<!-- CHAT AREA -->
+
+<div id="chatArea"
+class="w-full max-w-3xl p-4 space-y-4">
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- INPUT -->
+
+<div
+class="fixed bottom-4 left-1/2
+-translate-x-1/2
+w-full max-w-3xl
+bg-white border
+rounded-full flex gap-2
+p-2 shadow">
 
 <textarea id="prompt"
-class="flex-1 border rounded p-2"
+class="flex-1 outline-none p-2"
 placeholder="Ask anything...">
 
 </textarea>
 
 <button id="imageBtn"
-class="bg-purple-500 text-white px-3 rounded">
+class="bg-purple-500 text-white px-3 rounded-full">
 
 🖼
 
 </button>
 
 <button id="videoBtn"
-class="bg-pink-500 text-white px-3 rounded">
+class="bg-pink-500 text-white px-3 rounded-full">
 
 🎬
 
 </button>
 
 <button id="send"
-class="bg-blue-500 text-white px-4 rounded">
+class="bg-blue-500 text-white px-4 rounded-full">
 
-Send
+➤
 
 </button>
-
-</div>
-
-</div>
 
 </div>
 
@@ -95,15 +152,9 @@ Send
 document.addEventListener("DOMContentLoaded",()=>{
 
 const chatArea=document.getElementById("chatArea")
+const welcome=document.getElementById("welcome")
 const promptBox=document.getElementById("prompt")
-const send=document.getElementById("send")
 const chatList=document.getElementById("chatList")
-const imageBtn=document.getElementById("imageBtn")
-const videoBtn=document.getElementById("videoBtn")
-
-
-
-// CHAT MEMORY
 
 let chats=
 JSON.parse(localStorage.getItem("broChats")||"[]")
@@ -117,7 +168,6 @@ chats=[{id:Date.now(),messages:[]}]
 let active=chats[0].id
 
 
-
 function activeChat(){
 
 return chats.find(c=>c.id===active)
@@ -125,7 +175,7 @@ return chats.find(c=>c.id===active)
 }
 
 
-function saveChats(){
+function save(){
 
 localStorage.setItem(
 
@@ -157,7 +207,7 @@ d.onclick=()=>{
 
 active=c.id
 
-renderMessages()
+render()
 
 }
 
@@ -171,19 +221,21 @@ renderSidebar()
 
 
 
-function addMessage(role,text){
+function add(role,text){
+
+welcome.style.display="none"
 
 activeChat().messages.push({role,text})
 
-saveChats()
+save()
 
-renderMessages()
+render()
 
 }
 
 
 
-function renderMessages(){
+function render(){
 
 chatArea.innerHTML=""
 
@@ -191,16 +243,21 @@ activeChat().messages.forEach(m=>{
 
 let div=document.createElement("div")
 
-div.className=m.role==="user"
+div.className=
+
+m.role==="user"
+
 ?"text-right":""
 
 let bubble=document.createElement("div")
 
 bubble.className=
 
-"inline-block bg-white shadow rounded p-3 max-w-xl"
+"inline-block bg-white shadow rounded p-3"
 
-bubble.innerHTML=marked.parse(m.text)
+bubble.innerHTML=
+
+marked.parse(m.text)
 
 div.appendChild(bubble)
 
@@ -208,119 +265,17 @@ chatArea.appendChild(div)
 
 })
 
-chatArea.scrollTop=999999
+chatArea.scrollTop=99999
 
 }
 
 
 
-// TYPING
+// SEND
 
-async function typingReply(text){
+document.getElementById("send")
 
-let msg=""
-
-let bubble=document.createElement("div")
-
-bubble.className=
-
-"bg-white shadow rounded p-3 inline-block"
-
-chatArea.appendChild(bubble)
-
-for(let c of text){
-
-msg+=c
-
-bubble.innerHTML=
-
-marked.parse(msg+" ▋")
-
-await new Promise(r=>setTimeout(r,15))
-
-chatArea.scrollTop=999999
-
-}
-
-bubble.innerHTML=marked.parse(msg)
-
-}
-
-
-
-// VOICE SPEAK
-
-function speakAI(t){
-
-try{
-
-let s=new SpeechSynthesisUtterance(t)
-
-speechSynthesis.cancel()
-
-speechSynthesis.speak(s)
-
-}catch{}
-
-}
-
-
-
-// MIC
-
-function startVoice(){
-
-try{
-
-let r=new webkitSpeechRecognition()
-
-r.lang="en-US"
-
-r.start()
-
-r.onresult=e=>{
-
-promptBox.value=e.results[0][0].transcript
-
-sendChat()
-
-}
-
-}catch{
-
-alert("Mic unsupported")
-
-}
-
-}
-
-
-
-let lastTap=0
-
-send.onclick=()=>{
-
-let n=Date.now()
-
-if(n-lastTap<400){
-
-startVoice()
-
-}else{
-
-sendChat()
-
-}
-
-lastTap=n
-
-}
-
-
-
-// AI CHAT
-
-async function sendChat(){
+.onclick=async()=>{
 
 let text=promptBox.value.trim()
 
@@ -328,53 +283,27 @@ if(!text)return
 
 promptBox.value=""
 
-addMessage("user",text)
+add("user",text)
 
-addMessage("assistant","🤖 Thinking...")
+add("assistant","🤖 Thinking...")
 
 try{
 
-let res=await fetch(
+let r=await fetch(
 
 "https://patient-mountain-73cc.amitkumar736343.workers.dev/chat"
 
 )
 
-let data=await res.json()
+let d=await r.json()
 
-await typingReply(data.reply)
-
-speakAI(data.reply)
+add("assistant",d.reply)
 
 }catch{
 
-addMessage("assistant","❌ API ERROR")
+add("assistant","API ERROR")
 
 }
-
-}
-
-
-
-// RATIO
-
-function chooseRatio(cb){
-
-let r=prompt(
-
-"1 Square 1:1\n2 YouTube 16:9\n3 Shorts 9:16\n4 Portrait 3:4"
-
-)
-
-let w=1024,h=1024
-
-if(r=="2"){w=1280;h=720}
-
-if(r=="3"){w=720;h=1280}
-
-if(r=="4"){w=768;h=1024}
-
-cb(w,h)
 
 }
 
@@ -382,83 +311,37 @@ cb(w,h)
 
 // IMAGE
 
-imageBtn.onclick=()=>{
+document.getElementById("imageBtn")
 
-let text=prompt("Image Prompt")
+.onclick=()=>{
 
-if(!text)return
+let t=prompt("Image Prompt")
 
-chooseRatio((w,h)=>{
-
-addMessage("assistant","🖼 Generating...")
+if(!t)return
 
 let url=
 
-`https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=${w}&height=${h}`
+`https://image.pollinations.ai/prompt/${encodeURIComponent(t)}`
 
-setTimeout(()=>{
+add("assistant",
 
-addMessage("assistant",
-
-`![img](${url})
-
-<button onclick="makeVideo('${url}')">
-
-🎬 Make 8s Video
-
-</button>`)
-
-},1200)
-
-})
+`![img](${url})`)
 
 }
 
 
 
-// VIDEO 8 SECOND
+// VIDEO
 
-window.makeVideo=function(img){
+document.getElementById("videoBtn")
 
-addMessage("assistant",
+.onclick=()=>{
 
-"🎬 Creating 8 Second Cinematic Video...")
+let t=prompt("Video Prompt")
 
-let v=
+add("assistant",
 
-`<video autoplay loop muted controls style="max-width:100%">
-
-<source src="${img}" type="video/mp4">
-
-</video>
-
-<p>⭐ 8 Second Loop Preview</p>`
-
-setTimeout(()=>{
-
-addMessage("assistant",v)
-
-},1200)
-
-}
-
-
-
-// VIDEO PROMPT
-
-videoBtn.onclick=()=>{
-
-let text=prompt("Video Prompt")
-
-if(!text)return
-
-chooseRatio(()=>{
-
-addMessage("assistant",
-
-"🎬 Hollywood Video Accepted:<br>"+text)
-
-})
+"🎬 8 Second Video Prompt:<br>"+t)
 
 }
 
@@ -466,7 +349,7 @@ addMessage("assistant",
 
 // NEW CHAT
 
-window.newChat=function(){
+window.newChat=()=>{
 
 let id=Date.now()
 
@@ -474,17 +357,26 @@ chats.unshift({id,messages:[]})
 
 active=id
 
-saveChats()
+save()
 
-renderMessages()
+render()
 
 }
 
-renderMessages()
+
+
+// SIDEBAR
+
+window.toggleSide=()=>{
+
+sidebar.classList.toggle("hidden")
+
+}
 
 })
 
 </script>
 
 </body>
+
 </html>
