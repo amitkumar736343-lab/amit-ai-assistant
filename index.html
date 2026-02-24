@@ -21,9 +21,7 @@
 <button onclick="toggleSide()">☰</button>
 
 <div class="font-bold">
-
 BROTHER GOD AI 🤖🔥
-
 </div>
 
 <button onclick="toggleDark()">🌙</button>
@@ -39,14 +37,9 @@ transform -translate-x-full transition z-50">
 
 <div class="p-4">
 
-<button onclick="newChat()"
-class="bg-gray-200 rounded-full w-full p-3">
-
+<button class="bg-gray-200 rounded-full w-full p-3">
 ➕ New Chat
-
 </button>
-
-<div id="chatList" class="mt-5 space-y-2"></div>
 
 </div>
 
@@ -57,12 +50,14 @@ onclick="toggleSide()"
 class="hidden fixed inset-0 bg-black/30 z-40"></div>
 
 
+
 <!-- CHAT -->
 
 <div id="chatArea"
 class="max-w-3xl mx-auto p-4 space-y-4 pb-40">
 
 </div>
+
 
 
 <!-- INPUT -->
@@ -74,46 +69,63 @@ flex gap-2 p-2
 w-[95%] max-w-3xl">
 
 <button id="plusBtn"
-class="bg-gray-200 rounded-full px-4">➕</button>
+class="bg-gray-200 rounded-full px-4">
+➕
+</button>
 
 <textarea id="prompt"
 placeholder="Ask anything..."
-class="flex-1 outline-none p-2 resize-none"></textarea>
+class="flex-1 outline-none p-2 resize-none">
+</textarea>
 
 <button id="micBtn"
-class="bg-gray-300 rounded-full px-4">🎤</button>
+class="bg-gray-300 rounded-full px-4">
+🎤
+</button>
 
 <button id="imageBtn"
-class="bg-purple-500 text-white rounded-full px-4">🖼</button>
+class="bg-purple-500 text-white rounded-full px-4">
+🖼
+</button>
 
 <button id="videoBtn"
-class="bg-pink-500 text-white rounded-full px-4">🎬</button>
+class="bg-pink-500 text-white rounded-full px-4">
+🎬
+</button>
 
 <button id="send"
-class="bg-blue-500 text-white rounded-full px-5">➤</button>
+class="bg-blue-500 text-white rounded-full px-5">
+➤
+</button>
 
 </div>
 
 <input id="fileInput" type="file" hidden multiple>
+
 
 <script>
 
 document.addEventListener("DOMContentLoaded",()=>{
 
 const area=document.getElementById("chatArea")
+
 const promptBox=document.getElementById("prompt")
 
 const send=document.getElementById("send")
+
 const micBtn=document.getElementById("micBtn")
+
 const plusBtn=document.getElementById("plusBtn")
+
 const fileInput=document.getElementById("fileInput")
 
 const imageBtn=document.getElementById("imageBtn")
+
 const videoBtn=document.getElementById("videoBtn")
 
 
 
-// MESSAGE ADD
+// MESSAGE
 
 function add(role,text){
 
@@ -122,18 +134,54 @@ let div=document.createElement("div")
 div.className=
 role==="user"?"text-right":""
 
-let b=document.createElement("div")
+let bubble=document.createElement("div")
 
-b.className=
+bubble.className=
 "inline-block bg-white shadow rounded p-3 max-w-xl"
 
-b.innerHTML=marked.parse(text)
+bubble.innerHTML=marked.parse(text)
 
-div.appendChild(b)
+div.appendChild(bubble)
 
 area.appendChild(div)
 
 area.scrollTop=999999
+
+}
+
+
+
+// ⭐ TYPING EFFECT
+
+async function typingReply(text){
+
+let msg=""
+
+let div=document.createElement("div")
+
+let bubble=document.createElement("div")
+
+bubble.className=
+"inline-block bg-white shadow rounded p-3 max-w-xl"
+
+div.appendChild(bubble)
+
+area.appendChild(div)
+
+for(let c of text){
+
+msg+=c
+
+bubble.innerHTML=
+marked.parse(msg+" ▋")
+
+await new Promise(r=>setTimeout(r,15))
+
+area.scrollTop=999999
+
+}
+
+bubble.innerHTML=marked.parse(msg)
 
 }
 
@@ -155,7 +203,7 @@ send.click()
 
 
 
-// SEND CHAT ⭐⭐⭐
+// ⭐⭐⭐ FINAL SEND CHAT (FIXED)
 
 send.onclick=async()=>{
 
@@ -169,17 +217,38 @@ add("user",text)
 
 add("assistant","🤖 Thinking...")
 
+
 try{
 
 let r=await fetch(
 
-"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat")
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+message:text
+
+})
+
+})
 
 let d=await r.json()
 
-add("assistant",
+await typingReply(
 
-d.reply||"AI Ready 😈🔥")
+d.reply||
+
+"😈 BROTHER GOD ONLINE")
 
 speak(d.reply)
 
@@ -187,25 +256,23 @@ speak(d.reply)
 
 catch{
 
-add("assistant",
+await typingReply(
 
-"🔥 Fallback reply : "+text)
-
-}
+"🔥 API Connection Error")
 
 }
 
+}
 
 
-// VOICE ⭐⭐⭐
+
+// VOICE
 
 micBtn.onclick=()=>{
 
 try{
 
-let rec=
-
-new webkitSpeechRecognition()
+let rec=new webkitSpeechRecognition()
 
 rec.lang="en-US"
 
@@ -223,7 +290,7 @@ send.click()
 
 }catch{
 
-alert("Voice unsupported")
+alert("Voice Unsupported")
 
 }
 
@@ -249,7 +316,7 @@ speechSynthesis.speak(s)
 
 
 
-// IMAGE ⭐⭐⭐
+// IMAGE
 
 imageBtn.onclick=()=>{
 
@@ -273,15 +340,13 @@ let url=
 
 `https://image.pollinations.ai/prompt/${encodeURIComponent(t)}?width=${w}&height=${h}`
 
-add("assistant",
-
-`![img](${url})`)
+add("assistant",`![img](${url})`)
 
 }
 
 
 
-// VIDEO ⭐⭐⭐
+// VIDEO
 
 videoBtn.onclick=()=>{
 
@@ -297,11 +362,9 @@ add("assistant",
 
 
 
-// FILE ⭐⭐⭐
+// FILE
 
-plusBtn.onclick=
-
-()=>fileInput.click()
+plusBtn.onclick=()=>fileInput.click()
 
 fileInput.onchange=()=>{
 
@@ -327,9 +390,7 @@ add("assistant",
 
 `🎬 Video<br>
 
-<video controls
-
-class="max-w-full">
+<video controls class="max-w-full">
 
 <source src="${url}">
 
@@ -386,8 +447,6 @@ document.getElementById("overlay")
 .classList.toggle("hidden")
 
 }
-
-
 
 })
 
