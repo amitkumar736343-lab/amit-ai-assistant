@@ -1,32 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>BROTHER GOD AI 😈🔥</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex min-h-screen">
+
+<!-- SIDEBAR -->
+
+<div class="w-64 bg-white border-r p-3">
+
+<button onclick="newChat()"
+class="bg-blue-500 text-white w-full p-2 rounded">
+
+New Chat
+
+</button>
+
+<div id="chatList"
+class="mt-4 space-y-2">
+
+</div>
+
+</div>
+
+
+<!-- MAIN -->
+
+<div class="flex flex-col flex-1">
+
+<div class="p-3 bg-white border-b font-bold">
+
+BROTHER GOD AI 🤖🔥
+
+</div>
+
+
+<div id="chatArea"
+class="flex-1 overflow-auto p-4 space-y-4 pb-32">
+
+</div>
+
+
+<div
+class="fixed bottom-0 left-64 right-0 bg-white border-t p-3 flex gap-2">
+
+<textarea id="prompt"
+class="flex-1 border rounded p-2"
+placeholder="Ask anything...">
+
+</textarea>
+
+<button id="imageBtn"
+class="bg-purple-500 text-white px-3 rounded">
+
+🖼
+
+</button>
+
+<button id="videoBtn"
+class="bg-pink-500 text-white px-3 rounded">
+
+🎬
+
+</button>
+
+<button id="send"
+class="bg-blue-500 text-white px-4 rounded">
+
+Send
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
 <script>
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-let chats=[{id:Date.now(),messages:[]}]
+const chatArea=document.getElementById("chatArea")
+const promptBox=document.getElementById("prompt")
+const send=document.getElementById("send")
+const chatList=document.getElementById("chatList")
+const imageBtn=document.getElementById("imageBtn")
+const videoBtn=document.getElementById("videoBtn")
+
+
+
+// CHAT MEMORY
+
+let chats=
+JSON.parse(localStorage.getItem("broChats")||"[]")
+
+if(!chats.length){
+
+chats=[{id:Date.now(),messages:[]}]
+
+}
 
 let active=chats[0].id
 
-const chatArea=document.getElementById("chatArea")
-const send=document.getElementById("send")
-const imageBtn=document.getElementById("imageBtn")
-const videoBtn=document.getElementById("videoBtn")
-const sidebar=document.getElementById("sidebar")
-const menuBtn=document.getElementById("menuBtn")
-const newChat=document.getElementById("newChat")
-const plusBtn=document.getElementById("plusBtn")
-const aspectModal=document.getElementById("aspectModal")
+
 
 function activeChat(){
+
 return chats.find(c=>c.id===active)
+
 }
+
+
+function saveChats(){
+
+localStorage.setItem(
+
+"broChats",
+
+JSON.stringify(chats)
+
+)
+
+renderSidebar()
+
+}
+
+
+
+function renderSidebar(){
+
+chatList.innerHTML=""
+
+chats.forEach(c=>{
+
+let d=document.createElement("div")
+
+d.className="border p-2 cursor-pointer"
+
+d.innerText="Chat "+c.id
+
+d.onclick=()=>{
+
+active=c.id
+
+renderMessages()
+
+}
+
+chatList.appendChild(d)
+
+})
+
+}
+
+renderSidebar()
+
+
 
 function addMessage(role,text){
 
 activeChat().messages.push({role,text})
 
+saveChats()
+
 renderMessages()
 
 }
+
+
 
 function renderMessages(){
 
@@ -36,11 +191,14 @@ activeChat().messages.forEach(m=>{
 
 let div=document.createElement("div")
 
-div.className=m.role==="user"?"text-right":""
+div.className=m.role==="user"
+?"text-right":""
 
 let bubble=document.createElement("div")
 
-bubble.className="inline-block bg-white shadow rounded p-3 max-w-xl"
+bubble.className=
+
+"inline-block bg-white shadow rounded p-3 max-w-xl"
 
 bubble.innerHTML=marked.parse(m.text)
 
@@ -55,29 +213,30 @@ chatArea.scrollTop=999999
 }
 
 
-// ⭐ typing animation
+
+// TYPING
 
 async function typingReply(text){
 
 let msg=""
 
-let div=document.createElement("div")
-
 let bubble=document.createElement("div")
 
-bubble.className="inline-block bg-white shadow rounded p-3 max-w-xl"
+bubble.className=
 
-div.appendChild(bubble)
+"bg-white shadow rounded p-3 inline-block"
 
-chatArea.appendChild(div)
+chatArea.appendChild(bubble)
 
 for(let c of text){
 
 msg+=c
 
-bubble.innerHTML=marked.parse(msg+" ▋")
+bubble.innerHTML=
 
-await new Promise(r=>setTimeout(r,18))
+marked.parse(msg+" ▋")
+
+await new Promise(r=>setTimeout(r,15))
 
 chatArea.scrollTop=999999
 
@@ -88,93 +247,62 @@ bubble.innerHTML=marked.parse(msg)
 }
 
 
-// ⭐ Voice Speak
 
-function speakAI(text){
+// VOICE SPEAK
+
+function speakAI(t){
 
 try{
 
-let speech=new SpeechSynthesisUtterance(text)
-
-speech.lang="en-US"
-
-speech.rate=1
+let s=new SpeechSynthesisUtterance(t)
 
 speechSynthesis.cancel()
 
-speechSynthesis.speak(speech)
+speechSynthesis.speak(s)
 
-}catch(e){}
+}catch{}
 
 }
 
 
-// ⭐ REAL AI CHAT
 
-async function sendChat(){
+// MIC
 
-let input=document.getElementById("prompt")
-
-let text=input.value.trim()
-
-if(!text)return
-
-input.value=""
-
-addMessage("user",text)
-
-addMessage("assistant","🤖 Thinking...")
+function startVoice(){
 
 try{
 
-let res=await fetch(
+let r=new webkitSpeechRecognition()
 
-"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat",
+r.lang="en-US"
 
-{
+r.start()
 
-method:"POST",
+r.onresult=e=>{
 
-headers:{
+promptBox.value=e.results[0][0].transcript
 
-"Content-Type":"application/json"
-
-},
-
-body:JSON.stringify({
-
-message:text
-
-})
+sendChat()
 
 }
 
-)
+}catch{
 
-let data=await res.json()
-
-await typingReply(data.reply)
-
-speakAI(data.reply)
-
-}catch(e){
-
-addMessage("assistant","❌ API Error")
+alert("Mic unsupported")
 
 }
 
 }
 
 
-// ⭐ DOUBLE TAP SEND
 
 let lastTap=0
 
 send.onclick=()=>{
 
-let now=Date.now()
+let n=Date.now()
 
-if(now-lastTap<400){
+if(n-lastTap<400){
 
 startVoice()
 
@@ -184,61 +312,89 @@ sendChat()
 
 }
 
-lastTap=now
+lastTap=n
 
 }
 
 
-function startVoice(){
+
+// AI CHAT
+
+async function sendChat(){
+
+let text=promptBox.value.trim()
+
+if(!text)return
+
+promptBox.value=""
+
+addMessage("user",text)
+
+addMessage("assistant","🤖 Thinking...")
 
 try{
 
-let rec=new webkitSpeechRecognition()
+let res=await fetch(
 
-rec.lang="en-US"
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat"
 
-rec.start()
+)
 
-rec.onresult=e=>{
+let data=await res.json()
 
-document.getElementById("prompt").value=
+await typingReply(data.reply)
 
-e.results[0][0].transcript
+speakAI(data.reply)
 
-sendChat()
+}catch{
 
-}
-
-}catch(e){
-
-alert("Voice not supported")
+addMessage("assistant","❌ API ERROR")
 
 }
 
 }
 
 
-// ⭐ IMAGE
 
-async function makeImage(prompt,ratio){
+// RATIO
 
-addMessage("assistant","🖼 Generating image...")
+function chooseRatio(cb){
 
-let size="1024x1024"
+let r=prompt(
 
-if(ratio==="16:9") size="1280x720"
+"1 Square 1:1\n2 YouTube 16:9\n3 Shorts 9:16\n4 Portrait 3:4"
 
-if(ratio==="9:16") size="720x1280"
+)
 
-if(ratio==="3:4") size="768x1024"
+let w=1024,h=1024
 
-let w=size.split("x")[0]
+if(r=="2"){w=1280;h=720}
 
-let h=size.split("x")[1]
+if(r=="3"){w=720;h=1280}
+
+if(r=="4"){w=768;h=1024}
+
+cb(w,h)
+
+}
+
+
+
+// IMAGE
+
+imageBtn.onclick=()=>{
+
+let text=prompt("Image Prompt")
+
+if(!text)return
+
+chooseRatio((w,h)=>{
+
+addMessage("assistant","🖼 Generating...")
 
 let url=
 
-`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}`
+`https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=${w}&height=${h}`
 
 setTimeout(()=>{
 
@@ -246,104 +402,71 @@ addMessage("assistant",
 
 `![img](${url})
 
-<button onclick="window.makeVideoFromImage('${url}')">
+<button onclick="makeVideo('${url}')">
 
-🎬 Make Video
+🎬 Make 8s Video
 
 </button>`)
 
 },1200)
 
+})
+
 }
 
 
-// ⭐ VIDEO
 
-window.makeVideoFromImage=function(img){
+// VIDEO 8 SECOND
 
-addMessage("assistant","🎬 Creating cinematic video...")
-
-let video=
-
-`<video controls autoplay loop style="max-width:100%">
-
-<source src="${img}" type="video/mp4">
-
-</video>`
-
-setTimeout(()=>{
+window.makeVideo=function(img){
 
 addMessage("assistant",
 
-"🎬 Cinematic Preview:<br>"+video)
+"🎬 Creating 8 Second Cinematic Video...")
+
+let v=
+
+`<video autoplay loop muted controls style="max-width:100%">
+
+<source src="${img}" type="video/mp4">
+
+</video>
+
+<p>⭐ 8 Second Loop Preview</p>`
+
+setTimeout(()=>{
+
+addMessage("assistant",v)
 
 },1200)
 
 }
 
 
-function makeVideo(prompt,ratio){
+
+// VIDEO PROMPT
+
+videoBtn.onclick=()=>{
+
+let text=prompt("Video Prompt")
+
+if(!text)return
+
+chooseRatio(()=>{
 
 addMessage("assistant",
 
-"🎬 Hollywood Video Prompt:\n"+prompt+
+"🎬 Hollywood Video Accepted:<br>"+text)
 
-"\nRatio:"+ratio)
-
-}
-
-
-// ⭐ Aspect
-
-let actionType=null
-
-function openAspect(type){
-
-actionType=type
-
-aspectModal.style.display="flex"
+})
 
 }
 
 
-aspectModal.onclick=e=>{
 
-if(e.target.classList.contains("option")){
+// NEW CHAT
 
-let ratio=e.target.dataset.r
-
-aspectModal.style.display="none"
-
-let prompt=window.prompt(
-
-actionType==="image"?"Image Prompt?":"Video Prompt?"
-
-)
-
-if(!prompt)return
-
-if(actionType==="image")
-
-makeImage(prompt,ratio)
-
-if(actionType==="video")
-
-makeVideo(prompt,ratio)
-
-}
-
-}
-
-
-// EVENTS
-
-imageBtn.onclick=()=>openAspect("image")
-
-videoBtn.onclick=()=>openAspect("video")
-
-menuBtn.onclick=()=>sidebar.classList.toggle("hide")
-
-newChat.onclick=()=>{
+window.newChat=function(){
 
 let id=Date.now()
 
@@ -351,13 +474,9 @@ chats.unshift({id,messages:[]})
 
 active=id
 
+saveChats()
+
 renderMessages()
-
-}
-
-plusBtn.onclick=()=>{
-
-alert("+ Upload coming 🔥")
 
 }
 
@@ -366,3 +485,6 @@ renderMessages()
 })
 
 </script>
+
+</body>
+</html>
