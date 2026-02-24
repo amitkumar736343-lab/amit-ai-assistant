@@ -52,49 +52,17 @@ class="bg-gray-200 rounded-full w-full p-3">
 
 </div>
 
-
 <div id="overlay"
 onclick="toggleSide()"
 class="hidden fixed inset-0 bg-black/30 z-40"></div>
 
 
-<!-- MAIN -->
-
-<div class="flex flex-col items-center">
-
-<div id="welcome" class="text-center mt-20">
-
-<div
-class="w-20 h-20 mx-auto rounded-2xl
-bg-gradient-to-br from-blue-500 to-purple-500">
-
-</div>
-
-<h1
-class="text-3xl mt-4 font-bold
-bg-gradient-to-r from-blue-600 to-purple-600
-bg-clip-text text-transparent">
-
-Hello User
-
-</h1>
-
-<p class="text-gray-500">
-
-How can I help you today?
-
-</p>
-
-</div>
-
+<!-- CHAT -->
 
 <div id="chatArea"
-class="w-full max-w-3xl p-4 space-y-4 pb-40">
+class="max-w-3xl mx-auto p-4 space-y-4 pb-40">
 
 </div>
-
-</div>
-
 
 
 <!-- INPUT -->
@@ -106,43 +74,23 @@ flex gap-2 p-2
 w-[95%] max-w-3xl">
 
 <button id="plusBtn"
-class="bg-gray-200 rounded-full px-4">
-
-➕
-
-</button>
+class="bg-gray-200 rounded-full px-4">➕</button>
 
 <textarea id="prompt"
 placeholder="Ask anything..."
 class="flex-1 outline-none p-2 resize-none"></textarea>
 
 <button id="micBtn"
-class="bg-gray-300 rounded-full px-4">
-
-🎤
-
-</button>
+class="bg-gray-300 rounded-full px-4">🎤</button>
 
 <button id="imageBtn"
-class="bg-purple-500 text-white rounded-full px-4">
-
-🖼
-
-</button>
+class="bg-purple-500 text-white rounded-full px-4">🖼</button>
 
 <button id="videoBtn"
-class="bg-pink-500 text-white rounded-full px-4">
-
-🎬
-
-</button>
+class="bg-pink-500 text-white rounded-full px-4">🎬</button>
 
 <button id="send"
-class="bg-blue-500 text-white rounded-full px-5">
-
-➤
-
-</button>
+class="bg-blue-500 text-white rounded-full px-5">➤</button>
 
 </div>
 
@@ -152,144 +100,40 @@ class="bg-blue-500 text-white rounded-full px-5">
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-const area=chatArea
-const promptBox=prompt
-const list=chatList
+const area=document.getElementById("chatArea")
+const promptBox=document.getElementById("prompt")
 
-let chats=
-JSON.parse(localStorage.getItem("bro")||"[]")
+const send=document.getElementById("send")
+const micBtn=document.getElementById("micBtn")
+const plusBtn=document.getElementById("plusBtn")
+const fileInput=document.getElementById("fileInput")
 
-if(!chats.length){
-
-chats=[{id:Date.now(),messages:[]}]
-
-}
-
-let active=chats[0].id
+const imageBtn=document.getElementById("imageBtn")
+const videoBtn=document.getElementById("videoBtn")
 
 
 
-function act(){
-
-return chats.find(c=>c.id===active)
-
-}
-
-
-
-function save(){
-
-localStorage.setItem("bro",
-JSON.stringify(chats))
-
-renderSide()
-
-}
-
-
-
-function renderSide(){
-
-list.innerHTML=""
-
-chats.forEach(c=>{
-
-let d=document.createElement("div")
-
-d.className=
-"border p-2 rounded cursor-pointer"
-
-d.innerText="Chat "+c.id
-
-d.onclick=()=>{
-
-active=c.id
-
-render()
-
-toggleSide()
-
-}
-
-list.appendChild(d)
-
-})
-
-}
-
-renderSide()
-
-
+// MESSAGE ADD
 
 function add(role,text){
-
-welcome.style.display="none"
-
-act().messages.push({role,text})
-
-save()
-
-render()
-
-}
-
-
-
-function render(){
-
-area.innerHTML=""
-
-act().messages.forEach(m=>{
 
 let div=document.createElement("div")
 
 div.className=
-m.role==="user"?"text-right":""
+role==="user"?"text-right":""
 
 let b=document.createElement("div")
 
 b.className=
-"inline-block bg-white p-3 shadow rounded max-w-xl"
+"inline-block bg-white shadow rounded p-3 max-w-xl"
 
-b.innerHTML=marked.parse(m.text)
+b.innerHTML=marked.parse(text)
 
 div.appendChild(b)
 
 area.appendChild(div)
 
-})
-
 area.scrollTop=999999
-
-}
-
-
-
-async function typingReply(text){
-
-let msg=""
-
-let b=document.createElement("div")
-
-b.className=
-"bg-white p-3 shadow rounded inline-block"
-
-area.appendChild(b)
-
-for(let c of text){
-
-msg+=c
-
-b.innerHTML=
-marked.parse(msg+" ▋")
-
-await new Promise(r=>setTimeout(r,15))
-
-area.scrollTop=999999
-
-}
-
-b.innerHTML=marked.parse(msg)
 
 }
 
@@ -311,7 +155,7 @@ send.click()
 
 
 
-// SEND CHAT
+// SEND CHAT ⭐⭐⭐
 
 send.onclick=async()=>{
 
@@ -333,9 +177,9 @@ let r=await fetch(
 
 let d=await r.json()
 
-await typingReply(
+add("assistant",
 
-d.reply||"BROTHER GOD 😈🔥")
+d.reply||"AI Ready 😈🔥")
 
 speak(d.reply)
 
@@ -343,7 +187,7 @@ speak(d.reply)
 
 catch{
 
-await typingReply(
+add("assistant",
 
 "🔥 Fallback reply : "+text)
 
@@ -353,22 +197,24 @@ await typingReply(
 
 
 
-// VOICE
+// VOICE ⭐⭐⭐
 
 micBtn.onclick=()=>{
 
 try{
 
-let r=
+let rec=
+
 new webkitSpeechRecognition()
 
-r.lang="en-US"
+rec.lang="en-US"
 
-r.start()
+rec.start()
 
-r.onresult=e=>{
+rec.onresult=e=>{
 
 promptBox.value=
+
 e.results[0][0].transcript
 
 send.click()
@@ -385,12 +231,13 @@ alert("Voice unsupported")
 
 
 
+// SPEAK
+
 function speak(t){
 
 try{
 
-let s=
-new SpeechSynthesisUtterance(t)
+let s=new SpeechSynthesisUtterance(t)
 
 speechSynthesis.cancel()
 
@@ -402,7 +249,7 @@ speechSynthesis.speak(s)
 
 
 
-// IMAGE
+// IMAGE ⭐⭐⭐
 
 imageBtn.onclick=()=>{
 
@@ -428,68 +275,49 @@ let url=
 
 add("assistant",
 
-`![img](${url})
-
-<button onclick="makeVideo('${url}')">
-
-🎬 Make 8s Video
-
-</button>`)
+`![img](${url})`)
 
 }
 
 
 
-// VIDEO
+// VIDEO ⭐⭐⭐
 
 videoBtn.onclick=()=>{
 
 let t=prompt("Video Prompt")
 
+if(!t)return
+
 add("assistant",
 
-"🎬 Hollywood 8 Second Video:<br>"+t)
+"🎬 8 Second Cinematic Video Prompt : "+t)
 
 }
 
 
 
-window.makeVideo=img=>{
-
-add("assistant",
-
-`<video autoplay loop controls
-class="max-w-full">
-
-<source src="${img}">
-
-</video>
-
-⭐ 8 Second Loop Preview`)
-
-}
-
-
-
-// FILE UPLOAD
+// FILE ⭐⭐⭐
 
 plusBtn.onclick=
+
 ()=>fileInput.click()
 
 fileInput.onchange=()=>{
 
 for(let f of fileInput.files){
 
-let url=
-URL.createObjectURL(f)
+let url=URL.createObjectURL(f)
 
 if(f.type.startsWith("image")){
 
 add("assistant",
 
 `📷 Image<br>
+
 <img src="${url}"
-class="rounded mt-2">`)
+
+class="rounded mt-2 max-w-full">`)
 
 }
 
@@ -498,7 +326,10 @@ else if(f.type.startsWith("video")){
 add("assistant",
 
 `🎬 Video<br>
-<video controls>
+
+<video controls
+
+class="max-w-full">
 
 <source src="${url}">
 
@@ -530,41 +361,13 @@ ${f.name}
 
 
 
-// DARK
+// DARK MODE
 
 window.toggleDark=()=>{
 
-document.body.classList.toggle(
+document.body.classList.toggle("bg-black")
 
-"bg-black")
-
-document.body.classList.toggle(
-
-"text-white")
-
-}
-
-
-
-// CHAT
-
-window.newChat=()=>{
-
-let id=Date.now()
-
-chats.unshift({
-
-id,
-
-messages:[]
-
-})
-
-active=id
-
-save()
-
-render()
+document.body.classList.toggle("text-white")
 
 }
 
@@ -574,19 +377,17 @@ render()
 
 window.toggleSide=()=>{
 
-sidebar.classList.toggle(
+document.getElementById("sidebar")
 
-"-translate-x-full")
+.classList.toggle("-translate-x-full")
 
-overlay.classList.toggle(
+document.getElementById("overlay")
 
-"hidden")
+.classList.toggle("hidden")
 
 }
 
 
-
-render()
 
 })
 
