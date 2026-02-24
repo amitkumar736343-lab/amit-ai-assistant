@@ -1,870 +1,322 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Universal AI Chat</title>
-
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Markdown -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<style>
-html,body{
-height:100%;
-margin:0;
-}
-
-.safe-bottom{
-padding-bottom:env(safe-area-inset-bottom);
-}
-
-.typing-cursor::after{
-content:"▋";
-animation:blink 1s infinite;
-}
-
-@keyframes blink{
-50%{opacity:0;}
-}
-
-/* Sidebar mobile animation */
-.sidebar{
-transition:transform .3s ease;
-}
-
-.sidebar.hidden-mobile{
-transform:translateX(-100%);
-}
-
-.dark body{
-background:#111827;
-color:#e5e7eb;
-}
-
-pre{
-overflow:auto;
-border-radius:10px;
-padding:10px;
-background:#111827;
-color:white;
-}
-</style>
-</head>
-
-<body class="bg-gray-100">
-
-<!-- Loader (GitHub Pages blank page protection) -->
-<div id="loading"
-class="fixed inset-0 flex items-center justify-center bg-white z-50 text-lg font-semibold">
-Loading App...
-</div>
-
-<div id="app" class="flex min-h-screen">
-
-<!-- ================= SIDEBAR ================= -->
-<div id="sidebar"
-class="sidebar w-72 bg-white border-r flex flex-col fixed md:static h-full z-40 hidden-mobile md:translate-x-0">
-
-<div class="p-4 border-b flex justify-between">
-
-<button id="newChat"
-class="bg-blue-500 text-white px-3 py-2 rounded">
-New Chat
-</button>
-
-<button id="settingsBtn">⚙️</button>
-
-</div>
-
-<div id="chatList"
-class="flex-1 overflow-auto p-2 space-y-2">
-</div>
-
-</div>
-
-<!-- ================= MAIN ================= -->
-<div class="flex flex-col flex-1">
-
-<!-- TOP BAR -->
-<div class="p-3 border-b bg-white flex items-center gap-3">
-
-<button id="menuBtn"
-class="md:hidden text-xl">☰</button>
-
-<div class="font-semibold">
-Universal AI Chat
-</div>
-
-<div class="ml-auto flex gap-3">
-
-<button id="darkToggle">🌙</button>
-
-</div>
-
-</div>
-
-<!-- CHAT AREA -->
-<div id="chatArea"
-class="flex-1 overflow-auto p-4 space-y-4 pb-40">
-</div>
-
-<!-- INPUT BAR -->
-<div
-class="fixed bottom-0 left-0 md:left-72 right-0 bg-white border-t safe-bottom">
-
-<div class="p-3 flex gap-2">
-
-<textarea id="prompt"
-rows="1"
-placeholder="Ask anything..."
-class="flex-1 border rounded p-2 resize-none"></textarea>
-
-<button id="imageBtn"
-class="bg-purple-500 text-white px-3 rounded">
-🖼
-</button>
-
-<button id="videoBtn"
-class="bg-pink-500 text-white px-3 rounded">
-🎬
-</button>
-
-<button id="send"
-class="bg-blue-500 text-white px-4 rounded">
-Send
-</button>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
-<!-- SETTINGS MODAL -->
-<div id="settings"
-class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
-<div class="bg-white p-6 rounded w-96 space-y-3">
-
-<h2 class="font-bold text-lg">
-Settings
-</h2>
-
-<input id="apiKey"
-type="password"
-placeholder="OpenRouter API Key"
-class="border w-full p-2 rounded">
-
-<input id="model"
-placeholder="Model"
-class="border w-full p-2 rounded"
-value="deepseek/deepseek-r1:free">
-
-<textarea id="systemPrompt"
-placeholder="System Prompt"
-class="border w-full p-2 rounded"></textarea>
-
-<div class="flex justify-end gap-2">
-
-<button id="closeSettings">
-Cancel
-</button>
-
-<button id="saveSettings"
-class="bg-blue-500 text-white px-4 py-1 rounded">
-Save
-</button>
-
-</div>
-
-</div>
-
-</div>
-
 <script>
 
-/* ======================
-APP STATE
-======================*/
+let chats=[{id:Date.now(),messages:[]}]
+let active=chats[0].id
 
-const loading=document.getElementById("loading");
+const chatArea=document.getElementById("chatArea")
 
-let state={
-
-apiKey:localStorage.getItem("apiKey")||"",
-model:localStorage.getItem("model")||
-"deepseek/deepseek-r1:free",
-
-dark:localStorage.getItem("dark")==="1",
-
-chats:JSON.parse(localStorage.getItem("chats")||"[]"),
-
-active:null
-
-};
-
-/* ======================
-INIT
-======================*/
-
-function init(){
-
-document.getElementById("apiKey").value=state.apiKey;
-document.getElementById("model").value=state.model;
-
-if(state.dark){
-
-document.documentElement.classList.add("dark");
-document.body.classList.add("bg-gray-900","text-white");
-
+function activeChat(){
+return chats.find(c=>c.id===active)
 }
 
-if(!state.chats.length){
+function addMessage(role,text){
 
-createChat();
+activeChat().messages.push({role,text})
 
-}else{
-
-state.active=state.chats[0].id;
-
-}
-
-renderChats();
-renderMessages();
-
-loading.style.display="none";
-
-}
-
-function saveChats(){
-
-localStorage.setItem(
-"chats",
-JSON.stringify(state.chats)
-);
-
-}
-
-/* ======================
-CHAT MANAGEMENT
-======================*/
-
-function createChat(){
-
-const id=Date.now();
-
-state.chats.unshift({
-
-id,
-name:"New Chat",
-messages:[],
-system:""
-
-});
-
-state.active=id;
-
-saveChats();
-renderChats();
-renderMessages();
-
-}
-
-function getActive(){
-
-return state.chats.find(
-c=>c.id===state.active
-);
-
-}
-
-function renameChat(id){
-
-let name=prompt("Rename chat");
-
-if(!name)return;
-
-let chat=state.chats.find(c=>c.id===id);
-
-chat.name=name;
-
-saveChats();
-
-renderChats();
-
-}
-
-function deleteChat(id){
-
-if(!confirm("Delete chat?"))return;
-
-state.chats=
-state.chats.filter(c=>c.id!==id);
-
-if(!state.chats.length){
-
-createChat();
-
-}else{
-
-state.active=state.chats[0].id;
-
-}
-
-saveChats();
-
-renderChats();
-
-renderMessages();
-
-}
-
-function renderChats(){
-
-let el=document.getElementById("chatList");
-
-el.innerHTML="";
-
-state.chats.forEach(chat=>{
-
-let div=document.createElement("div");
-
-div.className=
-"p-2 border rounded flex justify-between cursor-pointer";
-
-div.innerHTML=`
-
-<span>${chat.name}</span>
-
-<div class="space-x-1">
-
-<button data-r="${chat.id}">✏️</button>
-
-<button data-d="${chat.id}">🗑</button>
-
-</div>
-
-`;
-
-div.onclick=()=>{
-
-state.active=chat.id;
-
-renderMessages();
-
-};
-
-div.querySelector("[data-r]").onclick=e=>{
-
-e.stopPropagation();
-
-renameChat(chat.id);
-
-};
-
-div.querySelector("[data-d]").onclick=e=>{
-
-e.stopPropagation();
-
-deleteChat(chat.id);
-
-};
-
-el.appendChild(div);
-
-});
-
-}
-
-/* ======================
-MESSAGES
-======================*/
-
-function addMessage(role,content){
-
-let chat=getActive();
-
-chat.messages.push({
-
-role,
-content
-
-});
-
-saveChats();
+renderMessages()
 
 }
 
 function renderMessages(){
 
-let chat=getActive();
+chatArea.innerHTML=""
 
-let area=document.getElementById("chatArea");
+activeChat().messages.forEach(m=>{
 
-area.innerHTML="";
+let div=document.createElement("div")
 
-(chat.messages||[]).forEach(m=>{
+div.className=m.role==="user"?"text-right":""
 
-area.appendChild(
-createMessage(m.role,m.content)
-);
+let bubble=document.createElement("div")
 
-});
+bubble.className="inline-block bg-white shadow rounded p-3 max-w-xl"
 
-area.scrollTop=area.scrollHeight;
+bubble.innerHTML=marked.parse(m.text)
 
-}
+div.appendChild(bubble)
 
-function createMessage(role,text){
-
-let div=document.createElement("div");
-
-div.className=
-role==="user"
-?"text-right"
-:"text-left";
-
-let bubble=document.createElement("div");
-
-bubble.className=
-"inline-block max-w-xl p-3 rounded bg-white shadow";
-
-bubble.innerHTML=
-marked.parse(text);
-
-div.appendChild(bubble);
-
-return div;
-
-}
-
-/* ======================
-STREAM CHAT
-======================*/
-
-async function sendChat(){
-
-const input=document.getElementById("prompt");
-
-let text=input.value.trim();
-
-if(!text)return;
-
-if(!state.apiKey){
-
-alert("Add API key");
-
-return;
-
-}
-
-input.value="";
-
-addMessage("user",text);
-
-renderMessages();
-
-let aiDiv=createMessage(
-"assistant",
-"<span class='typing-cursor'></span>"
-);
-
-document
-.getElementById("chatArea")
-.appendChild(aiDiv);
-
-let bubble=aiDiv.querySelector("div");
-
-let chat=getActive();
-
-let messages=[];
-
-if(chat.system){
-
-messages.push({
-role:"system",
-content:chat.system
-});
-
-}
-
-chat.messages.forEach(m=>{
-
-messages.push({
-
-role:m.role,
-content:m.content
-
-});
-
-});
-
-try{
-
-const res=await fetch(
-
-"https://openrouter.ai/api/v1/chat/completions",
-
-{
-
-method:"POST",
-
-headers:{
-
-Authorization:
-"Bearer "+state.apiKey,
-
-"Content-Type":
-"application/json"
-
-},
-
-body:JSON.stringify({
-
-model:state.model,
-
-messages,
-
-stream:true
+chatArea.appendChild(div)
 
 })
 
-});
-
-const reader=
-res.body.getReader();
-
-const decoder=new TextDecoder();
-
-let full="";
-
-while(true){
-
-const {done,value}
-=await reader.read();
-
-if(done)break;
-
-const chunk=
-decoder.decode(value);
-
-chunk.split("\n")
-.forEach(line=>{
-
-if(!line.startsWith("data:"))return;
-
-let data=
-line.replace("data:","").trim();
-
-if(data==="[DONE]")
-return;
-
-try{
-
-let json=
-JSON.parse(data);
-
-let token=
-json.choices?.[0]
-?.delta?.content;
-
-if(token){
-
-full+=token;
-
-bubble.innerHTML=
-marked.parse(full)
-+
-"<span class='typing-cursor'></span>";
-
-document
-.getElementById("chatArea")
-.scrollTop=
-999999;
+chatArea.scrollTop=999999
 
 }
 
-}catch{}
 
-});
+// ⭐ ChatGPT typing animation
 
-}
+async function typingReply(text){
 
-bubble.innerHTML=
-marked.parse(full);
+let msg=""
 
-addMessage(
-"assistant",
-full
-);
+let div=document.createElement("div")
 
-}catch(e){
+let bubble=document.createElement("div")
 
-bubble.innerHTML=
-"Error response.";
+bubble.className="inline-block bg-white shadow rounded p-3 max-w-xl"
 
-}
+div.appendChild(bubble)
 
-}
+chatArea.appendChild(div)
 
-/* ======================
-IMAGE GENERATION
-(OpenRouter compatible images endpoint)
-======================*/
+for(let c of text){
 
-async function generateImage(){
+msg+=c
 
-let prompt=window.prompt(
-"Image Prompt?"
-);
+bubble.innerHTML=marked.parse(msg+" ▋")
 
-if(!prompt)return;
+await new Promise(r=>setTimeout(r,20))
 
-if(!state.apiKey){
-
-alert("Add API Key");
-
-return;
+chatArea.scrollTop=999999
 
 }
 
-let chat=getActive();
+bubble.innerHTML=marked.parse(msg)
 
-addMessage(
-"assistant",
-"🖼 Generating image..."
-);
+}
 
-renderMessages();
+
+// ⭐ Voice Speak
+
+function speakAI(text){
+
+let speech=new SpeechSynthesisUtterance(text)
+
+speech.lang="en-US"
+
+speechSynthesis.speak(speech)
+
+}
+
+
+// ⭐ REAL AI CHAT
+
+async function sendChat(){
+
+let input=document.getElementById("prompt")
+
+let text=input.value.trim()
+
+if(!text)return
+
+input.value=""
+
+addMessage("user",text)
+
+addMessage("assistant","🤖 Thinking...")
 
 try{
 
 let res=await fetch(
 
-"https://openrouter.ai/api/v1/images/generations",
+"https://patient-mountain-73cc.amitkumar736343.workers.dev/chat"
 
-{
+)
 
-method:"POST",
+let data=await res.json()
 
-headers:{
+await typingReply(data.reply)
 
-Authorization:
-"Bearer "+state.apiKey,
+speakAI(data.reply)
 
-"Content-Type":
-"application/json"
+}catch(e){
 
-},
+addMessage("assistant","❌ API Error")
 
-body:JSON.stringify({
+}
 
-model:"openai/dall-e-3",
+}
 
-prompt
 
-})
+// ⭐ Voice Mic (double tap Send)
 
-});
+let lastTap=0
 
-let json=await res.json();
+send.onclick=()=>{
 
-let url=
-json.data?.[0]?.url;
+let now=Date.now()
 
-if(url){
+if(now-lastTap<400){
 
-addMessage(
-"assistant",
-`![image](${url})`
-);
+startVoice()
 
 }else{
 
-addMessage(
-"assistant",
-"Image failed."
-
-);
+sendChat()
 
 }
 
-}catch{
-
-addMessage(
-"assistant",
-"Image API Error."
-);
+lastTap=now
 
 }
 
-renderMessages();
+
+function startVoice(){
+
+let rec=new webkitSpeechRecognition()
+
+rec.lang="en-US"
+
+rec.start()
+
+rec.onresult=e=>{
+
+document.getElementById("prompt").value=
+
+e.results[0][0].transcript
+
+sendChat()
 
 }
 
-/* ======================
-VIDEO GENERATION
-(simple AI placeholder — works with APIs supporting video)
-======================*/
+}
 
-async function generateVideo(){
+
+// ⭐ IMAGE GENERATOR
+
+async function makeImage(prompt,ratio){
+
+addMessage("assistant","🖼 Generating image...")
+
+let size="1024x1024"
+
+if(ratio==="16:9") size="1280x720"
+
+if(ratio==="9:16") size="720x1280"
+
+if(ratio==="3:4") size="768x1024"
+
+let w=size.split("x")[0]
+
+let h=size.split("x")[1]
+
+let url=
+
+`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}`
+
+setTimeout(()=>{
+
+addMessage("assistant",
+
+`![img](${url})
+
+<button onclick="makeVideoFromImage('${url}')">
+
+🎬 Make Video
+
+</button>`)
+
+},1200)
+
+}
+
+
+// ⭐ VIDEO PREVIEW
+
+function makeVideoFromImage(img){
+
+addMessage("assistant","🎬 Creating cinematic video...")
+
+let video=
+
+`<video controls autoplay loop style="max-width:100%">
+
+<source src="${img}" type="video/mp4">
+
+</video>`
+
+setTimeout(()=>{
+
+addMessage("assistant",
+
+"🎬 Cinematic Preview:<br>"+video)
+
+},1200)
+
+}
+
+
+function makeVideo(prompt,ratio){
+
+addMessage("assistant",
+
+"🎬 Hollywood 8s Video Prompt:\n"+prompt+
+
+"\nRatio:"+ratio)
+
+}
+
+
+// ⭐ Aspect
+
+let actionType=null
+
+function openAspect(type){
+
+actionType=type
+
+aspectModal.style.display="flex"
+
+}
+
+aspectModal.onclick=e=>{
+
+if(e.target.classList.contains("option")){
+
+let ratio=e.target.dataset.r
+
+aspectModal.style.display="none"
 
 let prompt=window.prompt(
-"Video Prompt?"
-);
 
-if(!prompt)return;
+actionType==="image"?"Image Prompt?":"Video Prompt?"
 
-addMessage(
-"assistant",
-"🎬 Video generation requested:\n\n"+prompt+
-"\n\n(Use OpenRouter video supported model API)"
-);
+)
 
-renderMessages();
+if(!prompt)return
 
-}
+if(actionType==="image")
 
-/* ======================
-SETTINGS
-======================*/
+makeImage(prompt,ratio)
 
-document
-.getElementById("settingsBtn")
-.onclick=()=>{
+if(actionType==="video")
 
-document
-.getElementById("settings")
-.classList.remove("hidden");
-
-};
-
-document
-.getElementById("closeSettings")
-.onclick=()=>{
-
-document
-.getElementById("settings")
-.classList.add("hidden");
-
-};
-
-document
-.getElementById("saveSettings")
-.onclick=()=>{
-
-state.apiKey=
-document.getElementById("apiKey").value;
-
-state.model=
-document.getElementById("model").value;
-
-let chat=getActive();
-
-chat.system=
-document
-.getElementById("systemPrompt")
-.value;
-
-localStorage.setItem(
-"apiKey",
-state.apiKey
-);
-
-localStorage.setItem(
-"model",
-state.model
-);
-
-saveChats();
-
-document
-.getElementById("settings")
-.classList.add("hidden");
-
-};
-
-/* ======================
-DARK MODE
-======================*/
-
-document
-.getElementById("darkToggle")
-.onclick=()=>{
-
-state.dark=!state.dark;
-
-localStorage.setItem(
-"dark",
-state.dark?"1":"0"
-);
-
-location.reload();
-
-};
-
-/* ======================
-SIDEBAR MOBILE
-======================*/
-
-document
-.getElementById("menuBtn")
-.onclick=()=>{
-
-document
-.getElementById("sidebar")
-.classList.toggle(
-"hidden-mobile"
-);
-
-};
-
-/* ======================
-BUTTON EVENTS
-======================*/
-
-document
-.getElementById("send")
-.onclick=sendChat;
-
-document
-.getElementById("imageBtn")
-.onclick=generateImage;
-
-document
-.getElementById("videoBtn")
-.onclick=generateVideo;
-
-document
-.getElementById("newChat")
-.onclick=createChat;
-
-document
-.getElementById("prompt")
-.addEventListener(
-"keydown",
-e=>{
-
-if(
-e.key==="Enter"
-&&!e.shiftKey
-){
-
-e.preventDefault();
-
-sendChat();
+makeVideo(prompt,ratio)
 
 }
 
-});
+}
 
-init();
+
+// EVENTS
+
+imageBtn.onclick=()=>openAspect("image")
+
+videoBtn.onclick=()=>openAspect("video")
+
+menuBtn.onclick=
+
+()=>sidebar.classList.toggle("hide")
+
+newChat.onclick=()=>{
+
+let id=Date.now()
+
+chats.unshift({id,messages:[]})
+
+active=id
+
+renderMessages()
+
+}
+
+plusBtn.onclick=()=>{
+
+alert("+ Upload coming 🔥")
+
+}
+
+renderMessages()
 
 </script>
-
-</body>
-</html>
