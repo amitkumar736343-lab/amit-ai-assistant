@@ -10,6 +10,15 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+<style>
+.typing{animation:blink 1s infinite}
+@keyframes blink{
+0%{opacity:.3}
+50%{opacity:1}
+100%{opacity:.3}
+}
+</style>
+
 </head>
 
 <body class="bg-gray-100 transition">
@@ -20,13 +29,9 @@
 
 <button id="menuBtn">☰</button>
 
-<div class="font-bold text-lg">
+<b>Shivam AI 🤖🔥</b>
 
-Shivam AI 🤖🔥
-
-</div>
-
-<div>
+<div class="flex gap-2">
 
 <button id="settingBtn">⚙️</button>
 
@@ -44,7 +49,7 @@ Shivam AI 🤖🔥
 
 class="fixed left-0 top-0 w-72 h-full bg-white shadow
 
-transform -translate-x-full transition z-50">
+transform -translate-x-full transition z-50 overflow-auto">
 
 <div class="p-4">
 
@@ -66,12 +71,9 @@ class="mt-4 space-y-2">
 
 </div>
 
-
 <div id="overlay"
 
-class="hidden fixed inset-0 bg-black/30 z-40">
-
-</div>
+class="hidden fixed inset-0 bg-black/30 z-40"></div>
 
 
 
@@ -125,19 +127,17 @@ class="max-w-3xl mx-auto p-4 pb-40 space-y-4">
 
 <div
 
-class="fixed bottom-6 left-1/2
-
--translate-x-1/2
+class="fixed bottom-4 left-1/2 -translate-x-1/2
 
 bg-white shadow-xl rounded-full
 
 flex gap-2 p-2
 
-w-[95%] max-w-3xl">
+w-[96%] max-w-4xl">
 
 <button id="plusBtn"
 
-class="bg-gray-200 px-4 rounded-full">
+class="bg-gray-200 px-3 rounded-full">
 
 ➕
 
@@ -147,13 +147,13 @@ class="bg-gray-200 px-4 rounded-full">
 
 placeholder="Ask anything..."
 
-class="flex-1 outline-none resize-none p-2">
+class="flex-1 outline-none resize-none p-3 text-lg">
 
 </textarea>
 
 <button id="micBtn"
 
-class="bg-gray-300 px-4 rounded-full">
+class="bg-gray-300 px-3 rounded-full">
 
 🎤
 
@@ -161,7 +161,7 @@ class="bg-gray-300 px-4 rounded-full">
 
 <button id="imageBtn"
 
-class="bg-purple-500 text-white px-4 rounded-full">
+class="bg-purple-500 text-white px-3 rounded-full">
 
 🖼
 
@@ -169,7 +169,7 @@ class="bg-purple-500 text-white px-4 rounded-full">
 
 <button id="videoBtn"
 
-class="bg-pink-500 text-white px-4 rounded-full">
+class="bg-pink-500 text-white px-3 rounded-full">
 
 🎬
 
@@ -177,14 +177,13 @@ class="bg-pink-500 text-white px-4 rounded-full">
 
 <button id="sendBtn"
 
-class="bg-blue-500 text-white px-5 rounded-full">
+class="bg-blue-500 text-white px-4 rounded-full">
 
 ➤
 
 </button>
 
 </div>
-
 
 <input id="fileInput" type="file" hidden multiple>
 
@@ -194,40 +193,35 @@ class="bg-blue-500 text-white px-5 rounded-full">
 
 document.addEventListener("DOMContentLoaded",()=>{
 
+const area=chatArea
 
-const area=document.getElementById("chatArea")
+const promptBox=prompt
 
-const promptBox=document.getElementById("prompt")
-
-const sendBtn=document.getElementById("sendBtn")
-
-const micBtn=document.getElementById("micBtn")
-
-const plusBtn=document.getElementById("plusBtn")
-
-const fileInput=document.getElementById("fileInput")
-
-const imageBtn=document.getElementById("imageBtn")
-
-const videoBtn=document.getElementById("videoBtn")
-
-const sidebar=document.getElementById("sidebar")
-
-const overlay=document.getElementById("overlay")
-
-const chatList=document.getElementById("chatList")
-
-const settings=document.getElementById("settings")
+const list=chatList
 
 
+
+// CHAT MEMORY
 
 let chats=
 
-JSON.parse(localStorage.getItem("shivamAI")||"[]")
+JSON.parse(
+
+localStorage.getItem("shivamChats")
+
+||"[]")
 
 if(!chats.length)
 
-chats=[{id:Date.now(),messages:[]}]
+chats=[{
+
+id:Date.now(),
+
+name:"Chat 1",
+
+messages:[]
+
+}]
 
 let active=chats[0].id
 
@@ -235,7 +229,9 @@ let active=chats[0].id
 
 function act(){
 
-return chats.find(c=>c.id===active)
+return chats.find(
+
+c=>c.id===active)
 
 }
 
@@ -245,7 +241,7 @@ function save(){
 
 localStorage.setItem(
 
-"shivamAI",
+"shivamChats",
 
 JSON.stringify(chats))
 
@@ -257,7 +253,7 @@ renderSide()
 
 function renderSide(){
 
-chatList.innerHTML=""
+list.innerHTML=""
 
 chats.forEach(c=>{
 
@@ -267,7 +263,15 @@ d.className=
 
 "border p-2 rounded cursor-pointer"
 
-d.innerText="Chat "+c.id
+d.innerHTML=
+
+`${c.name}
+
+<div class='text-xs mt-1'>
+
+✏️ Rename | 🗑 Delete
+
+</div>`
 
 d.onclick=()=>{
 
@@ -279,7 +283,51 @@ toggleSide()
 
 }
 
-chatList.appendChild(d)
+
+
+d.oncontextmenu=e=>{
+
+e.preventDefault()
+
+let n=prompt(
+
+"Rename Chat")
+
+if(n){
+
+c.name=n
+
+save()
+
+}
+
+}
+
+d.ondblclick=e=>{
+
+if(confirm(
+
+"Delete Chat?")){
+
+chats=
+
+chats.filter(
+
+x=>x.id!==c.id)
+
+active=
+
+chats[0]?.id
+
+save()
+
+render()
+
+}
+
+}
+
+list.appendChild(d)
 
 })
 
@@ -289,7 +337,9 @@ chatList.appendChild(d)
 
 function add(role,text){
 
-act().messages.push({role,text})
+act().messages.push({
+
+role,text})
 
 save()
 
@@ -335,21 +385,43 @@ area.scrollTop=999999
 
 
 
-promptBox.onkeydown=e=>{
+// IMAGE
 
-if(e.key==="Enter"&&!e.shiftKey){
+function buildImage(p,r){
 
-e.preventDefault()
+let w=1024,h=1024
 
-sendBtn.click()
+if(r==2){w=1280;h=720}
+
+if(r==3){w=720;h=1280}
+
+if(r==4){w=768;h=1024}
+
+let url=
+
+"https://image.pollinations.ai/prompt/"
+
++encodeURIComponent(p)
+
++"?width="+w+
+
+"&height="+h+
+
+"&seed="+Date.now()
+
+add("assistant",
+
+`🖼 Image :
+
+<img src="${url}"
+
+class="rounded mt-2 max-w-full">`)
 
 }
 
-}
 
 
-
-// FREE AI CHAT
+// SEND
 
 sendBtn.onclick=async()=>{
 
@@ -361,17 +433,61 @@ promptBox.value=""
 
 add("user",text)
 
-add("assistant","🤖 Thinking...")
+let lower=text.toLowerCase()
+
+
+
+if(lower.includes("image")){
+
+let r=prompt(
+
+"Ratio 1 2 3 4")
+
+buildImage(text,r||1)
+
+return
+
+}
+
+
+
+if(lower.includes("video")){
+
+let r=prompt(
+
+"Ratio 1 2 3 4")
+
+add("assistant",
+
+"🎬 Video :"+text+
+
+"<br>Ratio :"+r)
+
+return
+
+}
+
+
+
+add("assistant",
+
+"<span class='typing'>
+
+🤖 typing...
+
+</span>")
 
 try{
 
 let r=await fetch(
 
-"https://text.pollinations.ai/"+
+"https://text.pollinations.ai/"
 
-encodeURIComponent(text))
++encodeURIComponent(text))
 
-let reply=await r.text()
+let reply=
+
+await r.text()
 
 add("assistant",reply)
 
@@ -383,25 +499,83 @@ new SpeechSynthesisUtterance(reply))
 
 catch{
 
+add("assistant","Offline")
+
+}
+
+}
+
+
+
+// BUTTONS
+
+imageBtn.onclick=()=>{
+
+let p=prompt("Image")
+
+let r=prompt("Ratio")
+
+buildImage(p,r||1)
+
+}
+
+
+
+videoBtn.onclick=()=>{
+
+let p=prompt("Video")
+
+let r=prompt("Ratio")
+
 add("assistant",
 
-"🔥 Offline Reply : "+text)
+"🎬 Video :"+p+
+
+"<br>"+r)
+
+}
+
+
+
+plusBtn.onclick=
+
+()=>fileInput.click()
+
+fileInput.onchange=()=>{
+
+for(let f of fileInput.files){
+
+let url=
+
+URL.createObjectURL(f)
+
+add("assistant",
+
+`📎
+
+<a href="${url}"
+
+target="_blank">
+
+${f.name}
+
+</a>`)
 
 }
 
 }
 
 
-
-// MIC
 
 micBtn.onclick=()=>{
 
 try{
 
-let rec=new webkitSpeechRecognition()
+let rec=
 
-rec.lang="en-US"
+new webkitSpeechRecognition()
+
+rec.lang="hi-IN"
 
 rec.start()
 
@@ -415,69 +589,7 @@ sendBtn.click()
 
 }
 
-}catch{
-
-alert("Mic not supported")
-
-}
-
-}
-
-
-
-// IMAGE
-
-imageBtn.onclick=()=>{
-
-let t=prompt("Image Prompt")
-
-if(!t)return
-
-let url=
-
-`https://image.pollinations.ai/prompt/${encodeURIComponent(t)}`
-
-add("assistant",
-
-`![img](${url})`)
-
-}
-
-
-
-// VIDEO
-
-videoBtn.onclick=()=>{
-
-let t=prompt("Video Prompt")
-
-if(!t)return
-
-add("assistant",
-
-"🎬 8 Second Video Prompt : "+t)
-
-}
-
-
-
-// FILE
-
-plusBtn.onclick=
-
-()=>fileInput.click()
-
-fileInput.onchange=()=>{
-
-for(let f of fileInput.files){
-
-let url=URL.createObjectURL(f)
-
-add("assistant",
-
-`📎 <a href="${url}" target="_blank">${f.name}</a>`)
-
-}
+}catch{}
 
 }
 
@@ -485,13 +597,15 @@ add("assistant",
 
 // DARK
 
-document.getElementById("darkBtn")
+darkBtn.onclick=()=>{
 
-.onclick=()=>{
+document.body.classList.toggle(
 
-document.body.classList.toggle("bg-black")
+"bg-black")
 
-document.body.classList.toggle("text-white")
+document.body.classList.toggle(
+
+"text-white")
 
 }
 
@@ -499,17 +613,19 @@ document.body.classList.toggle("text-white")
 
 // SETTINGS
 
-document.getElementById("settingBtn")
+settingBtn.onclick=
 
-.onclick=()=>settings.classList.remove("hidden")
+()=>settings.classList.remove(
 
-document.getElementById("closeSettings")
+"hidden")
 
-.onclick=()=>settings.classList.add("hidden")
+closeSettings.onclick=
 
-document.getElementById("clearChat")
+()=>settings.classList.add(
 
-.onclick=()=>{
+"hidden")
+
+clearChat.onclick=()=>{
 
 act().messages=[]
 
@@ -523,15 +639,15 @@ render()
 
 // NEW CHAT
 
-document.getElementById("newChat")
-
-.onclick=()=>{
+newChat.onclick=()=>{
 
 let id=Date.now()
 
 chats.unshift({
 
 id,
+
+name:"New Chat",
 
 messages:[]
 
@@ -561,9 +677,7 @@ overlay.classList.toggle(
 
 }
 
-document.getElementById("menuBtn")
-
-.onclick=toggleSide
+menuBtn.onclick=toggleSide
 
 overlay.onclick=toggleSide
 
