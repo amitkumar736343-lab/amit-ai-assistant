@@ -1,469 +1,222 @@
-<!-- ⭐⭐⭐ SHIVAM AI ULTIMATE FINAL ⭐⭐⭐ -->
-
-<!-- (HEAD SAME रहेगा ऊपर जैसा है — change नहीं) -->
-
-<script>
-
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shivam AI Ultimate 😈🔥</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+body.dark{background:#0f172a;color:white}
+.typing{animation:blink 1s infinite}
+@keyframes blink{0%{opacity:.3}50%{opacity:1}100%{opacity:.3}}
+</style>
+</head>
+<body class="bg-gray-100 transition"><!-- HEADER --><div class="bg-white shadow p-3 flex justify-between items-center">
+<button id="menuBtn">☰</button>
+<b>Shivam AI Ultimate 🤖🔥</b>
+<div class="flex gap-2">
+<button id="settingBtn">⚙️</button>
+<button id="darkBtn">🌙</button>
+</div>
+</div><!-- SIDEBAR --><div id="sidebar" class="fixed left-0 top-0 w-72 h-full bg-white shadow transform -translate-x-full transition z-50 overflow-auto">
+<div class="p-4 space-y-3">
+<button id="newChat" class="bg-gray-200 w-full p-3 rounded">➕ New Chat</button>
+<div id="chatList" class="space-y-2"></div>
+</div>
+</div>
+<div id="overlay" class="hidden fixed inset-0 bg-black/30 z-40"></div><!-- SETTINGS --><div id="settings" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+<div class="bg-white p-5 rounded-xl w-72 space-y-3">
+<h2 class="font-bold">⚙️ Settings</h2>
+<button id="clearChat" class="bg-red-200 w-full p-2 rounded">Clear Chat</button>
+<button id="closeSettings" class="bg-gray-200 w-full p-2 rounded">Close</button>
+</div>
+</div><!-- CHAT --><div id="chatArea" class="max-w-3xl mx-auto p-4 pb-40 space-y-4"></div><!-- INPUT --><div class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-white shadow-xl rounded-full flex gap-2 p-2 w-[96%] max-w-4xl">
+<button id="plusBtn" class="bg-gray-200 px-3 rounded-full">➕</button>
+<textarea id="prompt" placeholder="Ask anything..." class="flex-1 outline-none resize-none p-3 text-lg"></textarea>
+<button id="micBtn" class="bg-gray-300 px-3 rounded-full">🎤</button>
+<button id="imageBtn" class="bg-purple-500 text-white px-3 rounded-full">🖼</button>
+<button id="videoBtn" class="bg-pink-500 text-white px-3 rounded-full">🎬</button>
+<button id="sendBtn" class="bg-blue-500 text-white px-4 rounded-full">➤</button>
+</div>
+<input id="fileInput" type="file" hidden multiple><script>
 document.addEventListener("DOMContentLoaded",()=>{
 
 const area=document.getElementById("chatArea")
 const promptBox=document.getElementById("prompt")
 const list=document.getElementById("chatList")
 
+// ===== CHAT SAVE =====
 let chats=JSON.parse(localStorage.getItem("shivamUltimate")||"[]")
-
-if(!chats.length)
-chats=[{id:Date.now(),name:"Chat 1",messages:[]}]
-
+if(!chats.length) chats=[{id:Date.now(),name:"Chat 1",messages:[]}]
 let active=chats[0].id
 
-function act(){
-return chats.find(c=>c.id===active)
-}
+function act(){return chats.find(c=>c.id===active)}
 
 function save(){
-
-localStorage.setItem(
-"shivamUltimate",
-JSON.stringify(chats))
-
+localStorage.setItem("shivamUltimate",JSON.stringify(chats))
 renderSide()
-
 }
 
 function renderSide(){
-
 list.innerHTML=""
-
 chats.forEach(c=>{
-
 let d=document.createElement("div")
+d.className="border rounded p-2 cursor-pointer"
+d.innerHTML=`${c.name}<div class='text-xs'>✏️Rename | 🗑Delete</div>`
 
-d.className=
-"border rounded p-2 cursor-pointer"
-
-d.innerHTML=
-`${c.name}
-<div class='text-xs'>
-✏️Rename | 🗑Delete
-</div>`
-
-d.onclick=()=>{
-active=c.id
-render()
-toggleSide()
-}
+d.onclick=()=>{active=c.id;render();toggleSide()}
 
 d.ondblclick=()=>{
-
 if(confirm("Delete Chat?")){
-
-chats=
-chats.filter(x=>x.id!==c.id)
-
+chats=chats.filter(x=>x.id!==c.id)
 active=chats[0]?.id
-
-save()
-
-render()
-
-}
-
-}
+save();render()
+}}
 
 d.oncontextmenu=e=>{
-
 e.preventDefault()
-
 let n=prompt("Rename Chat")
-
-if(n){
-
-c.name=n
-
-save()
-
-}
-
+if(n){c.name=n;save()}
 }
 
 list.appendChild(d)
-
 })
-
 }
 
 function add(role,text){
-
 act().messages.push({role,text})
-
-save()
-
-render()
-
+save();render()
 }
 
 function render(){
-
 area.innerHTML=""
-
 act().messages.forEach(m=>{
-
 let div=document.createElement("div")
-
-div.className=
-
-m.role==="user"
-?"text-right":""
-
+div.className=m.role==="user"?"text-right":""
 let b=document.createElement("div")
-
-b.className=
-
-"inline-block bg-white shadow rounded p-3 max-w-xl"
-
-b.innerHTML=
-
-marked.parse(m.text)
-
+b.className="inline-block bg-white shadow rounded p-3 max-w-xl"
+b.innerHTML=marked.parse(m.text)
 div.appendChild(b)
-
 area.appendChild(div)
-
 })
-
 area.scrollTop=999999
-
 }
 
-
-
-// ⭐ RATIO FUNCTION
-
-function askRatio(){
-
-let r=prompt(
-
-"Select Ratio:\n\n"+
-"1 Square (1:1)\n"+
-"2 YouTube (16:9)\n"+
-"3 Shorts (9:16)\n"+
-"4 Portrait (3:4)"
-
-)
-
-return r||"1"
-
-}
-
-
-
-// ⭐ IMAGE BUILD
-
-function buildImage(prompt,ratio){
-
+// ===== IMAGE =====
+function buildImage(p,r){
 let w=1024,h=1024
-
-if(ratio==2){w=1280;h=720}
-
-if(ratio==3){w=720;h=1280}
-
-if(ratio==4){w=768;h=1024}
-
-let url=
-
-`https://image.pollinations.ai/prompt/${
-encodeURIComponent(prompt)
-}?width=${w}&height=${h}&seed=${Date.now()}`
-
-add("assistant",
-
-`🖼 Generated Image :
-
-<img src="${url}"
-class="rounded mt-2 max-w-full">`)
-
+if(r==2){w=1280;h=720}
+if(r==3){w=720;h=1280}
+if(r==4){w=768;h=1024}
+let url=`https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=${w}&height=${h}&seed=${Date.now()}`
+add("assistant",`🖼 Image:<br><img src='${url}' class='rounded mt-2 max-w-full'>`)
 }
 
-
-
-// ⭐ SEND CHAT
-
-sendBtn.onclick=async()=>{
-
+// ===== SEND =====
+document.getElementById("sendBtn").onclick=async()=>{
 let text=promptBox.value.trim()
-
 if(!text)return
-
 promptBox.value=""
-
 add("user",text)
 
 let lower=text.toLowerCase()
 
-
-
-// IMAGE AUTO CHAT
-
 if(lower.includes("image")){
-
-let arr=text.split(" ")
-
-let ratio=arr[arr.length-1]
-
-if(isNaN(ratio))
-
-ratio=askRatio()
-
-buildImage(text,ratio)
-
+let r=prompt("Ratio 1 Square\n2 YouTube\n3 Shorts\n4 Portrait")
+buildImage(text,r||1)
 return
-
 }
-
-
-
-// VIDEO AUTO CHAT
 
 if(lower.includes("video")){
-
-let arr=text.split(" ")
-
-let ratio=arr[arr.length-1]
-
-if(isNaN(ratio))
-
-ratio=askRatio()
-
-add("assistant",
-
-"🎬 8 Second Cinematic Video :<br>"+
-
-text+
-
-"<br>Ratio :"+ratio)
-
+let r=prompt("Ratio 1 Square\n2 YouTube\n3 Shorts\n4 Portrait")
+add("assistant","🎬 8 Second Video : "+text+"<br>Ratio :"+r)
 return
-
 }
 
-
-
-add("assistant",
-
-"<span class='typing'>🤖 typing...</span>")
+add("assistant","<span class='typing'>🤖 typing...</span>")
 
 try{
-
-let res=
-
-await fetch(
-
-"https://text.pollinations.ai/"+
-encodeURIComponent(text))
-
-let reply=
-
-await res.text()
-
+let res=await fetch("https://text.pollinations.ai/"+encodeURIComponent(text))
+let reply=await res.text()
 add("assistant",reply)
-
-speechSynthesis.speak(
-
-new SpeechSynthesisUtterance(reply))
-
-}
-
-catch{
-
+speechSynthesis.speak(new SpeechSynthesisUtterance(reply))
+}catch{
 add("assistant","Offline")
-
 }
-
 }
-
-
 
 // ENTER SEND
-
 promptBox.onkeydown=e=>{
-
 if(e.key==="Enter"&&!e.shiftKey){
-
 e.preventDefault()
+document.getElementById("sendBtn").click()
+}}
 
-sendBtn.click()
-
-}
-
-}
-
-
-
-// IMAGE BUTTON
-
+// IMAGE BTN
 imageBtn.onclick=()=>{
-
 let p=prompt("Image Prompt")
-
 if(!p)return
-
-let r=askRatio()
-
-buildImage(p,r)
-
+let r=prompt("Ratio 1 2 3 4")
+buildImage(p,r||1)
 }
 
-
-
-// VIDEO BUTTON
-
+// VIDEO BTN
 videoBtn.onclick=()=>{
-
 let p=prompt("Video Prompt")
-
 if(!p)return
-
-let r=askRatio()
-
-add("assistant",
-
-"🎬 Video : "+p+
-
-"<br>Ratio :"+r)
-
+let r=prompt("Ratio 1 2 3 4")
+add("assistant","🎬 Video : "+p+"<br>Ratio :"+r)
 }
 
-
-
-// FILE
-
-plusBtn.onclick=
-()=>fileInput.click()
-
+// FILE UPLOAD
+plusBtn.onclick=()=>fileInput.click()
 fileInput.onchange=()=>{
-
 for(let f of fileInput.files){
-
-let url=
-URL.createObjectURL(f)
-
-add("assistant",
-
-`📎 <a href="${url}"
-target="_blank">
-
-${f.name}
-
-</a>`)
-
+let url=URL.createObjectURL(f)
+add("assistant",`📎 <a href='${url}' target='_blank'>${f.name}</a>`)
 }
-
 }
-
-
 
 // MIC
-
 micBtn.onclick=()=>{
-
 try{
-
-let rec=
-new webkitSpeechRecognition()
-
+let rec=new webkitSpeechRecognition()
 rec.lang="hi-IN"
-
 rec.start()
-
 rec.onresult=e=>{
-
-promptBox.value=
-e.results[0][0].transcript
-
-sendBtn.click()
-
+promptBox.value=e.results[0][0].transcript
+document.getElementById("sendBtn").click()
 }
-
 }catch{}
-
 }
 
-
-
-// DARK
-
-darkBtn.onclick=
-()=>document.body.classList.toggle("dark")
-
-
+// DARK MODE
+darkBtn.onclick=()=>document.body.classList.toggle("dark")
 
 // SETTINGS
-
-settingBtn.onclick=
-()=>settings.classList.remove("hidden")
-
-closeSettings.onclick=
-()=>settings.classList.add("hidden")
-
-clearChat.onclick=()=>{
-
-act().messages=[]
-
-save()
-
-render()
-
-}
-
-
+settingBtn.onclick=()=>settings.classList.remove("hidden")
+closeSettings.onclick=()=>settings.classList.add("hidden")
+clearChat.onclick=()=>{act().messages=[];save();render()}
 
 // NEW CHAT
-
 newChat.onclick=()=>{
-
 let id=Date.now()
-
-chats.unshift({
-
-id,
-name:"New Chat",
-messages:[]
-
-})
-
+chats.unshift({id,name:"New Chat",messages:[]})
 active=id
-
-save()
-
-render()
-
+save();render()
 }
-
-
 
 // SIDEBAR
-
 function toggleSide(){
-
-sidebar.classList.toggle(
-"-translate-x-full")
-
-overlay.classList.toggle(
-"hidden")
-
+sidebar.classList.toggle("-translate-x-full")
+overlay.classList.toggle("hidden")
 }
-
 menuBtn.onclick=toggleSide
-
 overlay.onclick=toggleSide
 
-
-
 renderSide()
-
 render()
 
 })
-
-</script>
+</script></body>
+</html>
